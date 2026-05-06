@@ -20,7 +20,7 @@ const app = new Hono();
 app.use(
   "*",
   cors({
-    origin: [env.FRONTEND_URL, "http://localhost:3000", "http://localhost:3001"],
+    origin: [env.FRONTEND_URL, "http://localhost:3000", "http://localhost:3001", "https://watpak.com", "https://www.watpak.com", "https://dercolbags.com", "https://www.dercolbags.com"],
     credentials: true,
     allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization", "Cookie"],
