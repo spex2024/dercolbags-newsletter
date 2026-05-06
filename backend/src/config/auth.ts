@@ -24,7 +24,7 @@ export const auth = betterAuth({
   ],
   secret: env.BETTER_AUTH_SECRET,
   baseURL: env.BETTER_AUTH_URL,
-  trustedOrigins: [env.FRONTEND_URL, "http://localhost:3000", "http://localhost:3001", "http://localhost:5173"],
+  trustedOrigins: [env.FRONTEND_URL, "http://localhost:3000", "http://localhost:3001", "http://localhost:5173", "https://watpak.com", "https://www.watpak.com", "https://dercolbags.com", "https://www.dercolbags.com"],
   cookiePrefix: "better-auth",
   cookies: {
     sessionToken: {
