@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { Separator } from "@/components/ui/separator"
 import { useState, type ReactNode } from "react"
 import {
@@ -84,7 +84,7 @@ function NavLink({
 function SidebarContent({ onNavigate, isCollapsed }: { onNavigate?: () => void; isCollapsed?: boolean }) {
   const location = useLocation()
   const { data: session, isPending: sessionLoading } = useSession()
-  const routeState = useRouterState({ from: "/_authenticated" })
+  const routeState = useRouterState()
   const role = (session?.user as any)?.role as string | undefined
   const pagePermissions = (routeState as any)?.loaderData?.pagePermissions ?? []
 
@@ -220,7 +220,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                     </AvatarFallback>
                   </Avatar>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuContent className="w-56" align="end">
                   <DropdownMenuGroup>
                     <DropdownMenuLabel className="font-normal">
                       <div className="flex flex-col space-y-1">

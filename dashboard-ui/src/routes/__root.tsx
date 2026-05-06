@@ -26,7 +26,10 @@ export const Route = createRootRoute({
         content: "Manage your newsletter subscribers, campaigns, and templates",
       },
     ],
-    links: [{ rel: "stylesheet", href: appCss }],
+    links: [
+      { rel: "stylesheet", href: appCss },
+      { rel: "icon", type: "image/png", href: "https://res.cloudinary.com/ddwet1dzj/image/upload/v1777042366/dercolbags/DERCOLBAGS_LOGO_tolkgw.png" },
+    ],
   }),
   notFoundComponent: () => (
     <main className="flex min-h-screen flex-col items-center justify-center">
