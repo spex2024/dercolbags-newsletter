@@ -44,7 +44,7 @@ export const importExportApi = {
 
     // Note: FormData needs special handling - no Content-Type header
     return fetch(
-      `${import.meta.env.VITE_API_URL || "http://localhost:3000"}/api/v1/import-export/import`,
+      `${import.meta.env.VITE_BACKEND_URL || "http://localhost:3000"}/api/v1/import-export/import`,
       {
         method: "POST",
         body: formData,
