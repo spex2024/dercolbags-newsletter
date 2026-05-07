@@ -59,12 +59,25 @@ export async function listMailingLists(query: ListMailingListsQuery, allowedBran
   const where = conditions.length > 0 ? and(...conditions) : undefined;
   const offset = (page - 1) * limit;
 
-  const [items, countResult] = await Promise.all([
+  const [rawItems, countResult] = await Promise.all([
     db.select().from(mailingLists).where(where).limit(limit).offset(offset).orderBy(asc(mailingLists.name)),
     db.select({ total: count() }).from(mailingLists).where(where),
   ]);
 
   const total = Number(countResult[0]?.total ?? 0);
+
+  const subscriberCounts = await db
+    .select({
+      listId: mailingListSubscribers.listId,
+      subscriberCount: count(mailingListSubscribers.subscriberId),
+    })
+    .from(mailingListSubscribers)
+    .where(inArray(mailingListSubscribers.listId, rawItems.map((l) => l.id)))
+    .groupBy(mailingListSubscribers.listId);
+
+  const countMap = new Map(subscriberCounts.map((r) => [r.listId, Number(r.subscriberCount)]));
+
+  const items = rawItems.map((l) => ({ ...l, subscriberCount: countMap.get(l.id) ?? 0 }));
 
   return {
     items,
@@ -150,6 +163,83 @@ export async function removeSubscriberFromList(listId: string, subscriberId: str
   await db
     .delete(mailingListSubscribers)
     .where(and(eq(mailingListSubscribers.listId, listId), eq(mailingListSubscribers.subscriberId, subscriberId)));
+}
+
+export async function getListSubscribers(
+  listId: string,
+  allowedBrands: AllowedBrands,
+  params: { page?: number; limit?: number } = {},
+) {
+  await getMailingListById(listId, allowedBrands);
+
+  const page = params.page || 1;
+  const limit = params.limit || 20;
+  const offset = (page - 1) * limit;
+
+  const [items, countResult] = await Promise.all([
+    db
+      .select({
+        id: subscribers.id,
+        brand: subscribers.brand,
+        name: subscribers.name,
+        email: subscribers.email,
+        phone: subscribers.phone,
+        location: subscribers.location,
+        source: subscribers.source,
+        status: subscribers.status,
+        isSubscribed: subscribers.isSubscribed,
+        unsubscribeToken: subscribers.unsubscribeToken,
+        unsubscribedAt: subscribers.unsubscribedAt,
+        lastEmailSentAt: subscribers.lastEmailSentAt,
+        createdAt: subscribers.createdAt,
+        updatedAt: subscribers.updatedAt,
+      })
+      .from(mailingListSubscribers)
+      .innerJoin(subscribers, eq(mailingListSubscribers.subscriberId, subscribers.id))
+      .where(eq(mailingListSubscribers.listId, listId))
+      .limit(limit)
+      .offset(offset)
+      .orderBy(asc(subscribers.email)),
+    db
+      .select({ total: count() })
+      .from(mailingListSubscribers)
+      .where(eq(mailingListSubscribers.listId, listId)),
+  ]);
+
+  const total = Number(countResult[0]?.total ?? 0);
+  return {
+    items,
+    pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+  };
+}
+
+export async function previewDynamicFilter(
+  filterConfig: SubscriberFilterConfig,
+  allowedBrands: AllowedBrands,
+): Promise<{ count: number; sample: Array<{ id: string; name: string | null; email: string }> }> {
+  const conditions = buildSubscriberConditions(filterConfig);
+
+  const brandCondition =
+    allowedBrands !== null && allowedBrands.length > 0
+      ? inArray(subscribers.brand, allowedBrands)
+      : undefined;
+
+  const where =
+    conditions && brandCondition
+      ? and(conditions, brandCondition)
+      : conditions ?? brandCondition;
+
+  const [countResult, sample] = await Promise.all([
+    db.select({ total: count() }).from(subscribers).where(where),
+    db
+      .select({ id: subscribers.id, name: subscribers.name, email: subscribers.email })
+      .from(subscribers)
+      .where(where)
+      .limit(5)
+      .orderBy(desc(subscribers.createdAt)),
+  ]);
+
+  return { count: Number(countResult[0]?.total ?? 0), sample };
 }
 
 export async function getListSubscriberCount(listId: string): Promise<number> {

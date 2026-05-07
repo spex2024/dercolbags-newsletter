@@ -19,9 +19,12 @@ export function validate<T extends z.ZodTypeAny>(
       }
 
       c.set("validated", result.data);
-      await next();
     } catch {
       return c.json(errorResponse("Invalid request body"), 400);
     }
+
+    // next() is outside the try-catch so real errors from controllers
+    // are not swallowed as "Invalid request body"
+    await next();
   };
 }

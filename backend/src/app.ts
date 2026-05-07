@@ -12,6 +12,7 @@ import {
   LOGIN_RATE_LIMIT,
   PASSWORD_RESET_RATE_LIMIT,
 } from "./middlewares/rate-limit.middleware";
+import { startScheduler, recoverStuckCampaigns } from "./services/email-queue.service";
 
 const app = new Hono();
 
@@ -77,5 +78,11 @@ app.notFound((c) => {
 // ─── Error Handler ────────────────────────────────────────────────────────────
 
 app.onError(errorMiddleware);
+
+// ─── Background Services ───────────────────────────────────────────────────
+startScheduler();
+recoverStuckCampaigns().catch((err) =>
+  console.error("[Startup] Failed to recover stuck campaigns:", err),
+);
 
 export default app;

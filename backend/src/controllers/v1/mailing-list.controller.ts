@@ -7,7 +7,7 @@ import type { CreateMailingListInput, UpdateMailingListInput, AddSubscribersInpu
 export async function createMailingList(c: Context) {
   const authUser = c.get("authUser") as AuthUser;
   const allowedBrands = getAccessibleBrands(authUser);
-  const body = await c.req.json<CreateMailingListInput>();
+  const body = c.get("validated") as CreateMailingListInput;
 
   if (allowedBrands && !allowedBrands.includes(body.brand)) {
     return c.json({ success: false, message: "You do not have access to this brand" }, 403);
@@ -49,7 +49,7 @@ export async function updateMailingList(c: Context) {
   const authUser = c.get("authUser") as AuthUser;
   const allowedBrands = getAccessibleBrands(authUser);
   const id = c.req.param("id");
-  const body = await c.req.json<UpdateMailingListInput>();
+  const body = c.get("validated") as UpdateMailingListInput;
 
   const list = await service.updateMailingList(id, body, allowedBrands);
   return c.json(successResponse(list));
@@ -64,11 +64,41 @@ export async function deleteMailingList(c: Context) {
   return c.json(successResponse({ deleted: true }));
 }
 
+export async function previewDynamicFilter(c: Context) {
+  const authUser = c.get("authUser") as AuthUser;
+  const allowedBrands = getAccessibleBrands(authUser);
+
+  let filterConfig: Record<string, unknown> = {};
+  try {
+    const body = await c.req.json<{ filterConfig?: Record<string, unknown> }>();
+    filterConfig = body.filterConfig ?? {};
+  } catch {
+    // empty body — treat as no filters
+  }
+
+  const result = await service.previewDynamicFilter(filterConfig as any, allowedBrands);
+  return c.json(successResponse(result));
+}
+
+export async function getListSubscribers(c: Context) {
+  const authUser = c.get("authUser") as AuthUser;
+  const allowedBrands = getAccessibleBrands(authUser);
+  const id = c.req.param("id");
+  const query = c.req.query();
+
+  const result = await service.getListSubscribers(id, allowedBrands, {
+    page: Number(query.page) || 1,
+    limit: Number(query.limit) || 50,
+  });
+
+  return c.json(successResponse(result));
+}
+
 export async function addSubscribers(c: Context) {
   const authUser = c.get("authUser") as AuthUser;
   const allowedBrands = getAccessibleBrands(authUser);
   const id = c.req.param("id");
-  const body = await c.req.json<AddSubscribersInput>();
+  const body = c.get("validated") as AddSubscribersInput;
 
   const result = await service.addSubscribersToList(id, body.subscriberIds, allowedBrands);
   return c.json(successResponse(result), 201);

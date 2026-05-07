@@ -124,8 +124,8 @@ export async function deleteCampaign(id: string, allowedBrands: AllowedBrands, u
     throw new AppError("Cannot delete campaign while it's sending", 400);
   }
 
-  await db.delete(campaigns).where(eq(campaigns.id, id));
   await logCampaignAction(id, "deleted", {}, userId);
+  await db.delete(campaigns).where(eq(campaigns.id, id));
 }
 
 export async function scheduleCampaign(id: string, input: ScheduleCampaignInput, allowedBrands: AllowedBrands, userId: string) {

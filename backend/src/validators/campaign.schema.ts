@@ -18,7 +18,12 @@ export const updateCampaignSchema = z.object({
 });
 
 export const scheduleCampaignSchema = z.object({
-  scheduledAt: z.string().datetime("Invalid datetime format"),
+  // Accept datetime-local ("2024-01-15T10:30"), full ISO ("2024-01-15T10:30:00.000Z"),
+  // or any parseable date string — the service validates it's in the future.
+  scheduledAt: z.string().min(1, "Scheduled date is required").refine(
+    (v) => !isNaN(new Date(v).getTime()),
+    "Invalid date format"
+  ),
 });
 
 export const campaignFilterQuerySchema = z.object({

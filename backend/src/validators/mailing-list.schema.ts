@@ -1,14 +1,17 @@
 import { z } from "zod";
 
+// Accept both "YYYY-MM-DD" (from date inputs) and full ISO datetimes
+const dateString = z.string().regex(/^\d{4}-\d{2}-\d{2}/, "Must be a valid date").optional();
+
 export const subscriberFilterSchema = z.object({
   brand: z.enum(["watpak", "dercolbags"]).optional(),
   status: z.array(z.enum(["new", "contacted", "converted", "spam"])).optional(),
   isSubscribed: z.boolean().optional(),
   location: z.string().trim().optional(),
-  createdAtFrom: z.string().datetime().optional(),
-  createdAtTo: z.string().datetime().optional(),
-  lastEmailSentAfter: z.string().datetime().optional(),
-  lastEmailSentBefore: z.string().datetime().optional(),
+  createdAtFrom: dateString,
+  createdAtTo: dateString,
+  lastEmailSentAfter: dateString,
+  lastEmailSentBefore: dateString,
 });
 
 export const createMailingListSchema = z.object({

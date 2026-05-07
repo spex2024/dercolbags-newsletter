@@ -1,6 +1,6 @@
 import { and, eq, sql } from "drizzle-orm";
 import { db } from "../db/client";
-import { campaigns, campaignRecipients, emailJobs, subscribers } from "../db/schema";
+import { campaigns, campaignRecipients, emailJobs, subscribers, campaignLogs } from "../db/schema";
 import { sendCampaignEmail } from "./email.service";
 import { replaceLinksWithTracking, injectTrackingPixel } from "./tracking.service";
 import { AppError } from "../utils/errors";
@@ -170,8 +170,6 @@ function chunkArray<T>(array: T[], size: number): T[][] {
   return chunks;
 }
 
-const campaignLogs = db._.schema?.campaignLogs;
-
 export async function processScheduledCampaigns(): Promise<void> {
   const now = new Date();
 
@@ -190,6 +188,28 @@ export async function processScheduledCampaigns(): Promise<void> {
   }
 }
 
-setInterval(() => {
-  processScheduledCampaigns().catch((err) => console.error("[Scheduler] Error:", err));
-}, 60000);
+// Resume any campaigns that were mid-send when the server last restarted
+export async function recoverStuckCampaigns(): Promise<void> {
+  const stuck = await db
+    .select()
+    .from(campaigns)
+    .where(eq(campaigns.status, "sending"));
+
+  if (stuck.length === 0) return;
+
+  console.log(`[Scheduler] Recovering ${stuck.length} campaign(s) stuck in "sending" state`);
+  for (const campaign of stuck) {
+    processCampaignJob(campaign.id).catch((err) =>
+      console.error(`[Scheduler] Failed to recover campaign ${campaign.id}:`, err),
+    );
+  }
+}
+
+export function startScheduler(): void {
+  // Check for scheduled campaigns every 60 seconds
+  setInterval(() => {
+    processScheduledCampaigns().catch((err) => console.error("[Scheduler] Error:", err));
+  }, 60_000);
+
+  console.log("[Scheduler] Started — checking every 60s");
+}

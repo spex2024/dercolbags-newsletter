@@ -15,7 +15,7 @@ export async function createCampaign(c: Context) {
   requireMarketingRole(authUser);
 
   const allowedBrands = getAccessibleBrands(authUser);
-  const body = await c.req.json<CreateCampaignInput>();
+  const body = c.get("validated") as CreateCampaignInput;
 
   if (allowedBrands && !allowedBrands.includes(body.brand)) {
     return c.json({ success: false, message: "You do not have access to this brand" }, 403);
@@ -58,7 +58,7 @@ export async function updateCampaign(c: Context) {
 
   const allowedBrands = getAccessibleBrands(authUser);
   const id = c.req.param("id");
-  const body = await c.req.json<UpdateCampaignInput>();
+  const body = c.get("validated") as UpdateCampaignInput;
 
   const campaign = await service.updateCampaign(id, body, allowedBrands, authUser.id);
   return c.json(successResponse(campaign));
@@ -92,7 +92,7 @@ export async function scheduleCampaign(c: Context) {
 
   const allowedBrands = getAccessibleBrands(authUser);
   const id = c.req.param("id");
-  const body = await c.req.json<ScheduleCampaignInput>();
+  const body = c.get("validated") as ScheduleCampaignInput;
 
   const campaign = await service.scheduleCampaign(id, body, allowedBrands, authUser.id);
   return c.json(successResponse(campaign));

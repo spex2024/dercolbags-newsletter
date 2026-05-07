@@ -85,4 +85,10 @@ export const mailingListsApi = {
     api.delete<{ success: boolean; message: string }>(
       `/api/v1/mailing-lists/${listId}/subscribers/${subscriberId}`,
     ),
+
+  previewFilter: (filterConfig: MailingList["filterConfig"]) =>
+    api.post<{
+      success: boolean
+      data: { count: number; sample: Array<{ id: string; name: string | null; email: string }> }
+    }>("/api/v1/mailing-lists/preview-filter", { filterConfig }),
 }

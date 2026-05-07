@@ -2,17 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { requirePageAccess } from "@/lib/permissions"
 import { useQuery } from "@tanstack/react-query"
 import { subscribersApi } from "@/services/api/subscribers"
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import { ArrowLeft, Mail, Phone, MapPin, Calendar, Globe } from "lucide-react"
+import { Loader2, ArrowLeft, Mail, Phone, MapPin, Globe, Calendar, Clock } from "lucide-react"
 import { format } from "date-fns"
 
 export const Route = createFileRoute("/_authenticated/subscribers/$id")({
@@ -31,8 +21,9 @@ function SubscriberDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-[400px] items-center justify-center">
-        <p className="text-muted-foreground">Loading...</p>
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3">
+        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Loading</p>
       </div>
     )
   }
@@ -40,104 +31,128 @@ function SubscriberDetailPage() {
   const subscriber = data?.data
   if (!subscriber) {
     return (
-      <div className="flex min-h-[400px] items-center justify-center">
-        <p className="text-muted-foreground">Subscriber not found</p>
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-2 border-2">
+        <p className="text-4xl font-black">404</p>
+        <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Subscriber not found</p>
       </div>
     )
   }
 
+  const initials = subscriber.name
+    ? subscriber.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
+    : subscriber.email[0].toUpperCase()
+
+  const STATUS_STYLE: Record<string, string> = {
+    new: "bg-secondary text-secondary-foreground",
+    contacted: "bg-foreground text-background",
+    converted: "bg-foreground text-background",
+    spam: "bg-destructive text-white",
+  }
+
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
-      <Button
-        variant="ghost"
-        size="sm"
+    <div className="mx-auto max-w-3xl">
+      {/* Nav */}
+      <button
+        className="mb-6 flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         onClick={() => navigate({ to: "/subscribers" })}
       >
-        <ArrowLeft className="mr-2 h-4 w-4" />
-        Back to Subscribers
-      </Button>
+        <ArrowLeft className="h-4 w-4" />
+        Subscribers
+      </button>
 
-      <Card>
-        <CardHeader>
-          <div className="flex items-start justify-between">
-            <div>
-              <CardTitle className="text-2xl">
-                {subscriber.name || "No name"}
-              </CardTitle>
-              <CardDescription className="mt-1">
-                {subscriber.email}
-              </CardDescription>
-            </div>
-            <div className="flex gap-2">
-              <Badge
-                variant={
-                  subscriber.brand === "watpak" ? "default" : "secondary"
-                }
-              >
-                {subscriber.brand === "watpak" ? "WatPak" : "DercolBags"}
-              </Badge>
-              <Badge variant="outline">{subscriber.status}</Badge>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="flex items-center gap-3">
-              <Mail className="h-4 w-4 text-muted-foreground" />
-              <div>
-                <p className="text-xs text-muted-foreground">Email</p>
-                <p className="text-sm">{subscriber.email}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <Phone className="h-4 w-4 text-muted-foreground" />
-              <div>
-                <p className="text-xs text-muted-foreground">Phone</p>
-                <p className="text-sm">{subscriber.phone || "—"}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <MapPin className="h-4 w-4 text-muted-foreground" />
-              <div>
-                <p className="text-xs text-muted-foreground">Location</p>
-                <p className="text-sm">{subscriber.location || "—"}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <Globe className="h-4 w-4 text-muted-foreground" />
-              <div>
-                <p className="text-xs text-muted-foreground">Source</p>
-                <p className="text-sm">{subscriber.source}</p>
-              </div>
-            </div>
+      {/* Main block */}
+      <div className="border-2 border-foreground shadow-[6px_6px_0px_0px_oklch(0.1_0_0)] divide-y-2 divide-foreground">
+
+        {/* Hero */}
+        <div className="bg-foreground text-background px-8 pt-10 pb-8 flex items-start gap-6">
+          {/* Avatar */}
+          <div className="shrink-0 flex h-16 w-16 items-center justify-center bg-background text-foreground text-xl font-black">
+            {initials}
           </div>
 
-          <Separator />
-
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div>
-              <p className="text-xs text-muted-foreground">Subscribed</p>
-              <p className="mt-1 text-sm font-medium">
-                {subscriber.isSubscribed ? "Active" : "Unsubscribed"}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Created</p>
-              <p className="mt-1 text-sm">
-                {format(new Date(subscriber.createdAt), "MMM d, yyyy")}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Last Email Sent</p>
-              <p className="mt-1 text-sm">
-                {subscriber.lastEmailSentAt
-                  ? format(new Date(subscriber.lastEmailSentAt), "MMM d, yyyy")
-                  : "Never"}
-              </p>
-            </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-background/40 mb-2">Subscriber</p>
+            <h1 className="text-3xl font-black tracking-tight leading-tight">
+              {subscriber.name || "No name"}
+            </h1>
+            <p className="mt-2 text-base text-background/60">{subscriber.email}</p>
           </div>
-        </CardContent>
-      </Card>
+
+          <div className="flex flex-col items-end gap-2 shrink-0">
+            <span className={`text-[10px] uppercase tracking-widest font-bold px-3 py-1 border border-background/20 ${STATUS_STYLE[subscriber.status] ?? "bg-secondary text-secondary-foreground"}`}>
+              {subscriber.status}
+            </span>
+            <span className={`text-[10px] uppercase tracking-widest font-bold px-3 py-1 border ${
+              subscriber.isSubscribed
+                ? "border-background/20 text-background/60"
+                : "border-destructive/60 text-destructive bg-background"
+            }`}>
+              {subscriber.isSubscribed ? "Subscribed" : "Unsubscribed"}
+            </span>
+          </div>
+        </div>
+
+        {/* Contact info grid */}
+        <div className="grid grid-cols-2 divide-x-2 divide-foreground">
+          {[
+            { icon: Mail, label: "Email", value: subscriber.email },
+            { icon: Phone, label: "Phone", value: subscriber.phone || "—" },
+            { icon: MapPin, label: "Location", value: subscriber.location || "—" },
+            { icon: Globe, label: "Source", value: subscriber.source },
+          ].map(({ icon: Icon, label, value }) => (
+            <div key={label} className="px-6 py-5">
+              <div className="flex items-center gap-2 mb-1.5">
+                <Icon className="h-3.5 w-3.5 text-muted-foreground" />
+                <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">{label}</p>
+              </div>
+              <p className="text-sm font-semibold truncate">{value}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Timeline strip */}
+        <div className="grid grid-cols-3 divide-x-2 divide-foreground bg-muted/20">
+          <div className="px-6 py-5">
+            <div className="flex items-center gap-2 mb-1.5">
+              <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+              <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Added</p>
+            </div>
+            <p className="text-sm font-semibold">
+              {format(new Date(subscriber.createdAt), "MMM d, yyyy")}
+            </p>
+          </div>
+
+          <div className="px-6 py-5">
+            <div className="flex items-center gap-2 mb-1.5">
+              <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+              <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Last Email</p>
+            </div>
+            <p className="text-sm font-semibold">
+              {subscriber.lastEmailSentAt
+                ? format(new Date(subscriber.lastEmailSentAt), "MMM d, yyyy")
+                : "Never"}
+            </p>
+          </div>
+
+          <div className="px-6 py-5">
+            <div className="flex items-center gap-2 mb-1.5">
+              <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+              <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Brand</p>
+            </div>
+            <p className="text-sm font-semibold capitalize">{subscriber.brand}</p>
+          </div>
+        </div>
+
+        {/* Unsubscribed notice */}
+        {!subscriber.isSubscribed && subscriber.unsubscribedAt && (
+          <div className="px-6 py-4 bg-destructive/5 flex items-center gap-3">
+            <div className="h-2 w-2 bg-destructive shrink-0" />
+            <p className="text-xs text-destructive">
+              Unsubscribed on {format(new Date(subscriber.unsubscribedAt), "MMM d, yyyy")}
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

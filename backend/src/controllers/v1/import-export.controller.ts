@@ -7,7 +7,7 @@ import type { CreateImportInput, CreateExportInput, ListJobsQuery } from "../../
 export async function createImport(c: Context) {
   const authUser = c.get("authUser") as AuthUser;
   const allowedBrands = getAccessibleBrands(authUser);
-  const body = await c.req.json<CreateImportInput>();
+  const body = c.get("validated") as CreateImportInput;
 
   if (allowedBrands && !allowedBrands.includes(body.brand)) {
     return c.json({ success: false, message: "You do not have access to this brand" }, 403);
@@ -22,7 +22,7 @@ export async function createImport(c: Context) {
 export async function createExport(c: Context) {
   const authUser = c.get("authUser") as AuthUser;
   const allowedBrands = getAccessibleBrands(authUser);
-  const body = await c.req.json<CreateExportInput>();
+  const body = c.get("validated") as CreateExportInput;
 
   if (allowedBrands && !allowedBrands.includes(body.brand)) {
     return c.json({ success: false, message: "You do not have access to this brand" }, 403);

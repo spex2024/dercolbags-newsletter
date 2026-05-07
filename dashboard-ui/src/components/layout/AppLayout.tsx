@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
-import { Separator } from "@/components/ui/separator"
 import { useState, type ReactNode } from "react"
 import {
   LayoutDashboard,
@@ -69,13 +68,13 @@ function NavLink({
       to={item.href}
       onClick={onClick}
       title={isCollapsed ? item.name : undefined}
-      className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
+      className={`flex items-center gap-3 border-l-[3px] px-3 py-2.5 text-[11px] font-bold uppercase tracking-[0.12em] transition-colors ${
         isActive
-          ? "bg-primary text-primary-foreground shadow-sm"
-          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-      } ${isCollapsed ? "justify-center px-0" : ""}`}
+          ? "border-foreground bg-foreground/8 text-foreground"
+          : "border-transparent text-muted-foreground hover:border-foreground/30 hover:bg-foreground/4 hover:text-foreground"
+      } ${isCollapsed ? "justify-center px-0 border-l-0 border-b-[3px] border-t-0 border-r-0" : ""}`}
     >
-      <item.icon className="h-4.5 w-4.5 shrink-0" />
+      <item.icon className="h-4 w-4 shrink-0" />
       {!isCollapsed && <span className="truncate">{item.name}</span>}
     </Link>
   )
@@ -88,8 +87,6 @@ function SidebarContent({ onNavigate, isCollapsed }: { onNavigate?: () => void; 
   const role = (session?.user as any)?.role as string | undefined
   const pagePermissions = (routeState as any)?.loaderData?.pagePermissions ?? []
 
-  const isLoading = sessionLoading
-
   const visibleNav = navigation.filter((item) => {
     if (!role) return false
     if (item.ownerAdminOnly) return role === "owner" || role === "admin"
@@ -99,31 +96,33 @@ function SidebarContent({ onNavigate, isCollapsed }: { onNavigate?: () => void; 
 
   return (
     <>
-      {/* Logo */}
-      <div className={`flex items-center ${isCollapsed ? "justify-center px-0" : "gap-3 px-4"} py-5`}>
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center bg-primary text-primary-foreground font-bold text-sm">
-          NL
+      {/* Logo — inverted */}
+      <div className={`bg-foreground text-background border-b flex items-center gap-3 ${isCollapsed ? "justify-center p-3" : "px-4 py-4"}`}>
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center bg-background text-foreground font-black text-xs">
+          DC
         </div>
         {!isCollapsed && (
           <div className="min-w-0">
-            <h2 className="truncate text-sm font-semibold tracking-tight">Newsletter</h2>
-            <p className="truncate text-xs text-muted-foreground">Dashboard</p>
+            <p className="truncate text-[11px] font-black uppercase tracking-[0.15em] text-background">
+              DercolBags
+            </p>
+            <p className="truncate text-[10px] tracking-wider text-background/50">
+              Newsletter
+            </p>
           </div>
         )}
       </div>
 
-      <Separator />
-
       {/* Navigation */}
-      <nav className="flex-1 space-y-1 px-3 py-4">
-        {isLoading
+      <nav className="flex-1 py-3">
+        {sessionLoading
           ? Array.from({ length: 7 }).map((_, i) => (
               <div
                 key={i}
                 className={`flex items-center gap-3 px-3 py-2.5 ${isCollapsed ? "justify-center px-0" : ""}`}
               >
-                <Skeleton className="h-[18px] w-[18px] shrink-0 rounded" />
-                {!isCollapsed && <Skeleton className="h-3.5 flex-1 rounded" style={{ width: `${55 + (i % 3) * 20}%` }} />}
+                <Skeleton className="h-4 w-4 shrink-0" />
+                {!isCollapsed && <Skeleton className="h-3 flex-1" style={{ width: `${55 + (i % 3) * 20}%` }} />}
               </div>
             ))
           : visibleNav.map((item) => {
@@ -143,8 +142,8 @@ function SidebarContent({ onNavigate, isCollapsed }: { onNavigate?: () => void; 
       {/* Footer */}
       {!isCollapsed && (
         <div className="border-t px-4 py-3">
-          <p className="truncate text-xs text-muted-foreground">
-            © {new Date().getFullYear()} Newsletter
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+            © {new Date().getFullYear()} DercolBags
           </p>
         </div>
       )}
@@ -174,58 +173,67 @@ export function AppLayout({ children }: { children: ReactNode }) {
       </Sheet>
 
       {/* Desktop Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 z-30 hidden flex-col border-r bg-card md:flex transition-all duration-300 ${isCollapsed ? "w-16" : "w-64"}`}>
+      <aside
+        className={`fixed inset-y-0 left-0 z-30 hidden flex-col border-r-2 bg-card md:flex transition-all duration-200 ${
+          isCollapsed ? "w-14" : "w-60"
+        }`}
+      >
         <div className="flex h-full flex-col">
           <SidebarContent isCollapsed={isCollapsed} />
         </div>
       </aside>
 
-      {/* Main Content Area */}
-      <div className={`transition-all duration-300 ${isCollapsed ? "md:pl-16" : "md:pl-64"}`}>
+      {/* Main Content */}
+      <div className={`transition-all duration-200 ${isCollapsed ? "md:pl-14" : "md:pl-60"}`}>
         {/* Top Bar */}
-        <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b bg-card/80 px-4 backdrop-blur-sm sm:px-6">
+        <header className="sticky top-0 z-20 flex h-12 items-center justify-between border-b-2 bg-card px-4 sm:px-6">
           <div className="flex items-center gap-2">
+            {/* Mobile menu */}
             <Button
               variant="ghost"
               size="icon"
               className="md:hidden"
               onClick={() => setSidebarOpen(true)}
             >
-              <Menu className="h-5 w-5" />
+              <Menu className="h-4 w-4" />
             </Button>
+            {/* Desktop collapse */}
             <Button
-              variant="outline"
+              variant="ghost"
               size="icon"
-              className="hidden md:flex bg-card"
+              className="hidden md:flex"
               onClick={() => setIsCollapsed(!isCollapsed)}
-              title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+              title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
-              {isCollapsed ? <PanelLeft className="h-4.5 w-4.5" /> : <PanelLeftClose className="h-4.5 w-4.5" />}
+              {isCollapsed
+                ? <PanelLeft className="h-4 w-4" />
+                : <PanelLeftClose className="h-4 w-4" />
+              }
             </Button>
           </div>
 
           <div className="flex items-center gap-3">
             <BrandSwitcher />
 
-            <Separator orientation="vertical" className="h-6" />
+            <div className="h-5 w-px bg-border" />
 
             {sessionLoading ? (
-              <Skeleton className="h-8 w-8 rounded-full" />
+              <Skeleton className="h-7 w-7" />
             ) : (
               <DropdownMenu>
-                <DropdownMenuTrigger render={<Button variant="ghost" className="relative h-8 w-8" />}>
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+                <DropdownMenuTrigger render={<Button variant="ghost" className="relative h-7 w-7 p-0" />}>
+                  <Avatar className="h-7 w-7 rounded-none">
+                    <AvatarFallback className="rounded-none bg-foreground text-background text-[11px] font-black">
                       {userInitial}
                     </AvatarFallback>
                   </Avatar>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end">
+                <DropdownMenuContent className="w-52" align="end">
                   <DropdownMenuGroup>
                     <DropdownMenuLabel className="font-normal">
-                      <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">{userName}</p>
-                        <p className="text-xs leading-none text-muted-foreground">{userEmail}</p>
+                      <div className="flex flex-col gap-0.5">
+                        <p className="text-xs font-bold uppercase tracking-wider">{userName}</p>
+                        <p className="text-[11px] text-muted-foreground">{userEmail}</p>
                       </div>
                     </DropdownMenuLabel>
                   </DropdownMenuGroup>

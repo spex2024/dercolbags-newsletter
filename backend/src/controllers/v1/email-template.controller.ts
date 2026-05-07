@@ -38,7 +38,7 @@ function canManageCategory(authUser: AuthUser, category: string): boolean {
 export async function createEmailTemplate(c: Context) {
   const authUser = c.get("authUser") as AuthUser;
   const allowedBrands = getAccessibleBrands(authUser);
-  const body = await c.req.json<CreateEmailTemplateInput>();
+  const body = c.get("validated") as CreateEmailTemplateInput;
 
   if (allowedBrands && !allowedBrands.includes(body.brand)) {
     return c.json({ success: false, message: "You do not have access to this brand" }, 403);
@@ -85,7 +85,7 @@ export async function updateEmailTemplate(c: Context) {
   const authUser = c.get("authUser") as AuthUser;
   const allowedBrands = getAccessibleBrands(authUser);
   const id = c.req.param("id");
-  const body = await c.req.json<UpdateEmailTemplateInput>();
+  const body = c.get("validated") as UpdateEmailTemplateInput;
 
   const existing = await service.getTemplateById(id, allowedBrands);
   if (!canManageCategory(authUser, existing.category)) {
@@ -114,7 +114,7 @@ export async function updateTemplateStatus(c: Context) {
   const authUser = c.get("authUser") as AuthUser;
   const allowedBrands = getAccessibleBrands(authUser);
   const id = c.req.param("id");
-  const body = await c.req.json<UpdateTemplateStatusInput>();
+  const body = c.get("validated") as UpdateTemplateStatusInput;
 
   const existing = await service.getTemplateById(id, allowedBrands);
   if (!canManageCategory(authUser, existing.category)) {
@@ -129,7 +129,7 @@ export async function previewTemplate(c: Context) {
   const authUser = c.get("authUser") as AuthUser;
   const allowedBrands = getAccessibleBrands(authUser);
   const id = c.req.param("id");
-  const body = await c.req.json<PreviewTemplateInput>();
+  const body = c.get("validated") as PreviewTemplateInput;
 
   const result = await service.previewTemplate(id, body.variables, allowedBrands);
   return c.json(successResponse(result));
@@ -139,7 +139,7 @@ export async function sendTestEmail(c: Context) {
   const authUser = c.get("authUser") as AuthUser;
   const allowedBrands = getAccessibleBrands(authUser);
   const id = c.req.param("id");
-  const body = await c.req.json<SendTestInput>();
+  const body = c.get("validated") as SendTestInput;
 
   const existing = await service.getTemplateById(id, allowedBrands);
   if (!canManageCategory(authUser, existing.category)) {
