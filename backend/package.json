@@ -24,6 +24,7 @@
     "hono": "^4.12.15",
     "mailgun.js": "^13.0.0",
     "resend": "^4.5.2",
+    "uploadthing": "^7.7.4",
     "zod": "^4"
   },
   "devDependencies": {

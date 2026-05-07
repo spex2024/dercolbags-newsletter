@@ -99,8 +99,8 @@ export function ImageUploadDialog({ open, onSelect, onClose }: ImageUploadDialog
               endpoint="emailImageUploader"
               onClientUploadComplete={(res) => {
                 const file = res?.[0]
-                if (file?.url) {
-                  onSelect(file.url)
+                if (file?.ufsUrl) {
+                  onSelect(file.ufsUrl)
                   onClose()
                 }
               }}

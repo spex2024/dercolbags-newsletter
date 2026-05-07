@@ -13,6 +13,8 @@ import {
   PASSWORD_RESET_RATE_LIMIT,
 } from "./middlewares/rate-limit.middleware";
 import { startScheduler, recoverStuckCampaigns } from "./services/email-queue.service";
+import { createRouteHandler } from "uploadthing/server";
+import { uploadRouter } from "./uploadthing";
 
 const app = new Hono();
 
@@ -51,6 +53,12 @@ app.use("/api/auth/reset-password", rateLimit(PASSWORD_RESET_RATE_LIMIT));
 // ─── Better Auth Handler ──────────────────────────────────────────────────────
 
 app.on(["GET", "POST"], "/api/auth/*", (c) => auth.handler(c.req.raw));
+
+// ─── UploadThing (Public - handles its own auth) ────────────────────────────
+const utHandlers = createRouteHandler({ router: uploadRouter });
+
+app.get("/api/uploadthing", (c) => utHandlers.GET(c.req.raw));
+app.post("/api/uploadthing", (c) => utHandlers.POST(c.req.raw));
 
 // ─── Webhooks (Public - no auth required) ─────────────────────────────────────
 

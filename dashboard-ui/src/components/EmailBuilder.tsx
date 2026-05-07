@@ -1,6 +1,7 @@
-import { useRef, useImperativeHandle, forwardRef, useState, useCallback } from "react"
+import { useRef, useImperativeHandle, forwardRef, useState, useCallback, useEffect } from "react"
 import EmailEditor, { type EditorRef, type EmailEditorProps } from "react-email-editor"
 import { ImageUploadDialog } from "./ImageUploadDialog"
+import { useUploadThing } from "@/lib/uploadthing"
 
 interface EmailBuilderProps {
   designJson?: Record<string, unknown>
@@ -21,6 +22,11 @@ export const EmailBuilder = forwardRef<EmailBuilderRef, EmailBuilderProps>(
     const [imageDialogOpen, setImageDialogOpen] = useState(false)
     const imageDoneRef = useRef<((result: { url: string }) => void) | null>(null)
 
+    // UploadThing hook for programmatic uploads (drag-and-drop onto canvas)
+    const { startUpload } = useUploadThing("emailImageUploader")
+    const startUploadRef = useRef(startUpload)
+    useEffect(() => { startUploadRef.current = startUpload }, [startUpload])
+
     const handleImageSelect = useCallback((url: string) => {
       imageDoneRef.current?.({ url })
       imageDoneRef.current = null
@@ -40,12 +46,34 @@ export const EmailBuilder = forwardRef<EmailBuilderRef, EmailBuilderProps>(
         editor.loadDesign(designJson as any)
       }
 
-      // Intercept Unlayer's image picker with our custom dialog
+      // selectImage — intercepts the image picker dialog (click to change image)
       ;(editor as any).registerCallback(
         "selectImage",
         (_data: unknown, done: (result: { url: string }) => void) => {
           imageDoneRef.current = done
           setImageDialogOpen(true)
+        },
+      )
+
+      // image — handles direct file uploads (drag-and-drop onto canvas blocks)
+      ;(editor as any).registerCallback(
+        "image",
+        async (
+          file: File,
+          done: (result: { progress: number; url?: string }) => void,
+        ) => {
+          try {
+            done({ progress: 20 })
+            const res = await startUploadRef.current([file])
+            const url = res?.[0]?.ufsUrl
+            if (url) {
+              done({ progress: 100, url })
+            } else {
+              done({ progress: 0 })
+            }
+          } catch {
+            done({ progress: 0 })
+          }
         },
       )
 
