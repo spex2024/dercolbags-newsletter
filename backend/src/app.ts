@@ -60,10 +60,10 @@ app.use("/api/auth/reset-password",  rateLimit(PASSWORD_RESET_RATE_LIMIT));
 app.on(["GET", "POST"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 
 // ─── UploadThing (Public - handles its own auth) ────────────────────────────
-const utHandlers = createRouteHandler({ router: uploadRouter });
+const utHandler = createRouteHandler({ router: uploadRouter });
 
-app.get("/api/uploadthing", (c) => utHandlers.GET(c.req.raw));
-app.post("/api/uploadthing", (c) => utHandlers.POST(c.req.raw));
+app.get("/api/uploadthing",  (c) => utHandler(c.req.raw));
+app.post("/api/uploadthing", (c) => utHandler(c.req.raw));
 
 // ─── Webhooks (Public - no auth required) ─────────────────────────────────────
 
