@@ -42,10 +42,10 @@ const TABS: { key: SubscriptionTab; label: string; icon: React.ElementType }[] =
 ]
 
 function tabToParams(tab: SubscriptionTab) {
-  if (tab === "active")       return { isSubscribed: true,  unsubscribeReason: undefined }
-  if (tab === "unsubscribed") return { isSubscribed: false, unsubscribeReason: "manual" as const }
-  if (tab === "bounced")      return { isSubscribed: false, unsubscribeReason: "bounce" as const }
-  return                             { isSubscribed: undefined, unsubscribeReason: undefined }
+  if (tab === "active")       return { isSubscribed: true as const,      unsubscribeReason: undefined }
+  if (tab === "unsubscribed") return { isSubscribed: false as const,     unsubscribeReason: undefined }
+  if (tab === "bounced")      return { isSubscribed: undefined,          unsubscribeReason: "bounce" as const }
+  return                             { isSubscribed: undefined,          unsubscribeReason: undefined }
 }
 
 // ── Page ──────────────────────────────────────────────────────────────────────
@@ -86,7 +86,7 @@ function SubscribersPage() {
 
   const emptyLabel = {
     active:       "No active subscribers",
-    unsubscribed: "No manually unsubscribed emails",
+    unsubscribed: "No unsubscribed emails",
     bounced:      "No bounced emails",
     all:          "No subscribers found",
   }[tab]
@@ -155,7 +155,7 @@ function SubscribersPage() {
         <div className="flex items-start gap-3 border border-foreground/10 bg-muted/30 px-4 py-3">
           <UserMinus className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
           <p className="text-xs text-muted-foreground leading-relaxed">
-            These subscribers manually opted out. They are excluded from all campaign sends and imports.
+            All unsubscribed addresses (manual opt-out, admin action, complaint). Excluded from all campaign sends and imports.
           </p>
         </div>
       )}
