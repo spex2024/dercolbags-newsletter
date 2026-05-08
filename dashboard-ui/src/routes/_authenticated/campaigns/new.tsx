@@ -96,6 +96,16 @@ function StepBar({ current }: { current: 1 | 2 | 3 }) {
   )
 }
 
+const CATEGORY_BG: Record<string, string> = {
+  welcome:      "bg-emerald-800",
+  newsletter:   "bg-blue-900",
+  promotion:    "bg-red-900",
+  notification: "bg-zinc-800",
+  minimal:      "bg-zinc-600",
+  reengagement: "bg-violet-900",
+  event:        "bg-amber-800",
+}
+
 // ── Main component ──────────────────────────────────────────────────────────
 function NewCampaignPage() {
   const navigate = useNavigate()
@@ -403,15 +413,15 @@ function NewCampaignPage() {
                           : "border-foreground/30 hover:border-foreground"
                       }`}
                     >
-                      <div className={`relative flex h-32 flex-col items-center justify-center border-b-2 border-inherit gap-1 bg-muted/10`}>
-                        <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-muted-foreground/60">
+                      <div className={`relative flex h-32 flex-col items-center justify-center border-b-2 border-inherit gap-2 ${CATEGORY_BG[preset.category] ?? "bg-foreground/5"}`}>
+                        <span className="text-4xl font-black text-white/20 select-none">
+                          {preset.thumbnail}
+                        </span>
+                        <span className="text-[9px] uppercase tracking-[0.25em] font-bold text-white/60 bg-black/30 px-2 py-0.5">
                           {preset.category}
                         </span>
-                        <span className="text-3xl font-black text-foreground/10">
-                          {preset.thumbnail.padStart(2, "0")}
-                        </span>
                         {isSelected && (
-                          <div className="absolute top-2 right-2 flex h-6 w-6 items-center justify-center bg-foreground text-background">
+                          <div className="absolute top-2 right-2 flex h-6 w-6 items-center justify-center bg-white text-black">
                             <Check className="h-3.5 w-3.5" />
                           </div>
                         )}

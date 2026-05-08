@@ -475,8 +475,12 @@ function CampaignDetailPage() {
                         onClick={() => setPickerSelected({ label: preset.name, design: preset.design })}
                         className={`border-2 text-left transition-all hover:-translate-y-[2px] hover:shadow-md ${isSelected ? "border-foreground shadow-[4px_4px_0px_0px_oklch(0.1_0_0)]" : "border-foreground/30 hover:border-foreground"}`}
                       >
-                        <div className="relative flex h-24 flex-col items-center justify-center border-b-2 border-inherit bg-muted/10">
-                          <span className="text-4xl font-black text-foreground/10">{preset.thumbnail}</span>
+                        <div className={`relative flex h-24 flex-col items-center justify-center border-b-2 border-inherit gap-1 ${{
+                          welcome:"bg-emerald-800",newsletter:"bg-blue-900",promotion:"bg-red-900",
+                          notification:"bg-zinc-800",minimal:"bg-zinc-600",reengagement:"bg-violet-900",event:"bg-amber-800"
+                        }[preset.category] ?? "bg-zinc-700"}`}>
+                          <span className="text-3xl font-black text-white/20 select-none">{preset.thumbnail}</span>
+                          <span className="text-[9px] uppercase tracking-widest font-bold text-white/50">{preset.category}</span>
                           {isSelected && (
                             <div className="absolute top-1.5 right-1.5 flex h-5 w-5 items-center justify-center bg-foreground text-background">
                               <Check className="h-3 w-3" />
