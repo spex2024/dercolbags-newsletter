@@ -30,6 +30,7 @@ import {
   ShieldCheck,
   BarChart2,
   ChevronRight,
+  Sliders,
   type LucideIcon,
 } from "lucide-react"
 import { canAccessPage } from "@/lib/permissions"
@@ -115,8 +116,9 @@ const mainNav: NavItem[] = [
 ]
 
 const adminNav: NavItem[] = [
-  { name: "Users",       href: "/users",       icon: Settings,    ownerAdminOnly: true },
-  { name: "Permissions", href: "/permissions", icon: ShieldCheck, ownerAdminOnly: true },
+  { name: "Users",          href: "/users",          icon: Settings,    ownerAdminOnly: true },
+  { name: "Permissions",    href: "/permissions",    icon: ShieldCheck, ownerAdminOnly: true },
+  { name: "Brand Settings", href: "/brand-settings", icon: Sliders,     ownerAdminOnly: true },
 ]
 
 // ── NavLink ───────────────────────────────────────────────────────────────────

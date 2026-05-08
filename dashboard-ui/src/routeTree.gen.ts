@@ -19,6 +19,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedPermissionsRouteImport } from './routes/_authenticated/permissions'
 import { Route as AuthenticatedImportExportRouteImport } from './routes/_authenticated/import-export'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedBrandSettingsRouteImport } from './routes/_authenticated/brand-settings'
 import { Route as AuthenticatedUsersIndexRouteImport } from './routes/_authenticated/users/index'
 import { Route as AuthenticatedTemplatesIndexRouteImport } from './routes/_authenticated/templates/index'
 import { Route as AuthenticatedSubscribersIndexRouteImport } from './routes/_authenticated/subscribers/index'
@@ -86,6 +87,12 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedBrandSettingsRoute =
+  AuthenticatedBrandSettingsRouteImport.update({
+    id: '/brand-settings',
+    path: '/brand-settings',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedUsersIndexRoute = AuthenticatedUsersIndexRouteImport.update({
   id: '/users/',
   path: '/users/',
@@ -180,6 +187,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/brand-settings': typeof AuthenticatedBrandSettingsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/import-export': typeof AuthenticatedImportExportRoute
   '/permissions': typeof AuthenticatedPermissionsRoute
@@ -206,6 +214,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/brand-settings': typeof AuthenticatedBrandSettingsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/import-export': typeof AuthenticatedImportExportRoute
   '/permissions': typeof AuthenticatedPermissionsRoute
@@ -234,6 +243,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/_authenticated/brand-settings': typeof AuthenticatedBrandSettingsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/import-export': typeof AuthenticatedImportExportRoute
   '/_authenticated/permissions': typeof AuthenticatedPermissionsRoute
@@ -262,6 +272,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/reset-password'
     | '/unsubscribe'
+    | '/brand-settings'
     | '/dashboard'
     | '/import-export'
     | '/permissions'
@@ -288,6 +299,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/reset-password'
     | '/unsubscribe'
+    | '/brand-settings'
     | '/dashboard'
     | '/import-export'
     | '/permissions'
@@ -315,6 +327,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/reset-password'
     | '/unsubscribe'
+    | '/_authenticated/brand-settings'
     | '/_authenticated/dashboard'
     | '/_authenticated/import-export'
     | '/_authenticated/permissions'
@@ -415,6 +428,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/brand-settings': {
+      id: '/_authenticated/brand-settings'
+      path: '/brand-settings'
+      fullPath: '/brand-settings'
+      preLoaderRoute: typeof AuthenticatedBrandSettingsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/users/': {
@@ -526,6 +546,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedBrandSettingsRoute: typeof AuthenticatedBrandSettingsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedImportExportRoute: typeof AuthenticatedImportExportRoute
   AuthenticatedPermissionsRoute: typeof AuthenticatedPermissionsRoute
@@ -547,6 +568,7 @@ interface AuthenticatedRouteChildren {
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedBrandSettingsRoute: AuthenticatedBrandSettingsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedImportExportRoute: AuthenticatedImportExportRoute,
   AuthenticatedPermissionsRoute: AuthenticatedPermissionsRoute,
