@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { analytics } from "./analytics.routes";
 import { campaigns } from "./campaigns.routes";
 import { csrfProtection } from "../../middlewares/csrf.middleware";
 import { dashboard } from "./dashboard.routes";
@@ -15,6 +16,7 @@ const v1 = new Hono();
 
 v1.use("*", csrfProtection());
 
+v1.route("/analytics", analytics);
 v1.route("/health", health);
 v1.route("/subscribers", subscribers);
 v1.route("/dashboard", dashboard);

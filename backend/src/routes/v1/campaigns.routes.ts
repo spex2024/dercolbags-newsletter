@@ -10,6 +10,7 @@ campaigns.use("*", authMiddleware);
 
 campaigns.post("/", validate(createCampaignSchema), controller.createCampaign);
 campaigns.get("/", validate(campaignFilterQuerySchema, "query"), controller.listCampaigns);
+campaigns.get("/analytics", controller.getCampaignsAnalytics);
 campaigns.get("/:id", controller.getCampaign);
 campaigns.patch("/:id", validate(updateCampaignSchema), controller.updateCampaign);
 campaigns.delete("/:id", controller.deleteCampaign);

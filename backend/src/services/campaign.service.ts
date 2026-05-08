@@ -231,6 +231,53 @@ export async function getCampaignStats(id: string, allowedBrands: AllowedBrands)
   };
 }
 
+export async function getCampaignsAnalytics(allowedBrands: AllowedBrands, brand?: Brand) {
+  const allowed: Brand[] = allowedBrands ?? ["watpak", "dercolbags"];
+  const effectiveBrands = brand
+    ? allowed.includes(brand) ? [brand] : []
+    : allowed;
+  const conditions = [
+    inArray(campaigns.status, ["sent", "sending"]),
+    inArray(campaigns.brand, effectiveBrands),
+  ];
+
+  const rows = await db
+    .select({
+      id: campaigns.id,
+      name: campaigns.name,
+      brand: campaigns.brand,
+      subject: campaigns.subject,
+      status: campaigns.status,
+      sentAt: campaigns.sentAt,
+      total: sql<number>`count(${campaignRecipients.id})`,
+      sent: sql<number>`count(${campaignRecipients.id}) filter (where ${campaignRecipients.status} = 'sent')`,
+      failed: sql<number>`count(${campaignRecipients.id}) filter (where ${campaignRecipients.status} = 'failed')`,
+      opened: sql<number>`count(${campaignRecipients.id}) filter (where ${campaignRecipients.status} in ('opened', 'clicked'))`,
+      clicked: sql<number>`count(${campaignRecipients.id}) filter (where ${campaignRecipients.status} = 'clicked')`,
+    })
+    .from(campaigns)
+    .leftJoin(campaignRecipients, eq(campaignRecipients.campaignId, campaigns.id))
+    .where(and(...conditions))
+    .groupBy(campaigns.id)
+    .orderBy(desc(campaigns.sentAt));
+
+  return rows.map((r) => ({
+    id: r.id,
+    name: r.name,
+    brand: r.brand,
+    subject: r.subject,
+    status: r.status,
+    sentAt: r.sentAt,
+    totalRecipients: Number(r.total),
+    sent: Number(r.sent),
+    failed: Number(r.failed),
+    opened: Number(r.opened),
+    clicked: Number(r.clicked),
+    openRate: r.total ? Number(((Number(r.opened) / Number(r.total)) * 100).toFixed(1)) : 0,
+    clickRate: r.total ? Number(((Number(r.clicked) / Number(r.total)) * 100).toFixed(1)) : 0,
+  }));
+}
+
 async function getCampaignRecipients(campaign: Campaign): Promise<string[]> {
   if (campaign.targetType === "all") {
     const result = await db

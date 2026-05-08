@@ -117,3 +117,12 @@ export async function getCampaignStats(c: Context) {
   const stats = await service.getCampaignStats(id, allowedBrands);
   return c.json(successResponse(stats));
 }
+
+export async function getCampaignsAnalytics(c: Context) {
+  const authUser = c.get("authUser") as AuthUser;
+  const allowedBrands = getAccessibleBrands(authUser);
+  const brand = c.req.query("brand") as "watpak" | "dercolbags" | undefined;
+
+  const data = await service.getCampaignsAnalytics(allowedBrands, brand);
+  return c.json(successResponse(data));
+}

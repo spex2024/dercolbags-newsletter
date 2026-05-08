@@ -19,6 +19,8 @@ import {
   Check,
   Clock,
   Users,
+  MailOpen,
+  MousePointerClick,
 } from "lucide-react"
 import { format } from "date-fns"
 import { toast } from "sonner"
@@ -79,6 +81,13 @@ function CampaignDetailPage() {
   const { data, isLoading } = useQuery({
     queryKey: ["campaign", id],
     queryFn: () => campaignsApi.get(id),
+  })
+
+  const { data: statsData } = useQuery({
+    queryKey: ["campaign-stats", id],
+    queryFn: () => campaignsApi.getStats(id),
+    enabled: !!data?.data && ["sent", "sending", "scheduled"].includes(data.data.status),
+    refetchInterval: data?.data?.status === "sending" ? 10_000 : false,
   })
 
   const sendMutation = useMutation({
@@ -453,7 +462,7 @@ function CampaignDetailPage() {
         </div>
 
         {/* Stats */}
-        {campaign.stats && (
+        {statsData?.data && (
           <>
             <div className="px-8 py-3 bg-muted/40 flex items-center gap-2">
               <Users className="h-3.5 w-3.5 text-muted-foreground" />
@@ -461,13 +470,13 @@ function CampaignDetailPage() {
                 Performance
               </p>
             </div>
-            <div className="grid grid-cols-5 divide-x">
+            {/* raw counts */}
+            <div className="grid grid-cols-4 divide-x">
               {[
-                { label: "Recipients", value: campaign.stats.totalRecipients },
-                { label: "Delivered", value: campaign.stats.delivered },
-                { label: "Opened", value: campaign.stats.opened },
-                { label: "Clicked", value: campaign.stats.clicked },
-                { label: "Bounced", value: campaign.stats.bounced },
+                { label: "Recipients", value: statsData.data.totalRecipients },
+                { label: "Delivered", value: statsData.data.sent },
+                { label: "Failed", value: statsData.data.failed },
+                { label: "Pending", value: statsData.data.pending },
               ].map((stat) => (
                 <div key={stat.label} className="px-4 py-7 text-center">
                   <p className="text-5xl font-black tabular-nums leading-none">
@@ -478,6 +487,35 @@ function CampaignDetailPage() {
                   </p>
                 </div>
               ))}
+            </div>
+            {/* open & click rates */}
+            <div className="grid grid-cols-2 divide-x border-t">
+              <div className="px-8 py-8 flex items-center gap-6">
+                <div className="p-3 bg-muted rounded-full">
+                  <MailOpen className="h-5 w-5 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="text-4xl font-black tabular-nums leading-none">
+                    {statsData.data.openRate}%
+                  </p>
+                  <p className="mt-1.5 text-[10px] uppercase tracking-widest text-muted-foreground">
+                    Open Rate &middot; {statsData.data.opened} opens
+                  </p>
+                </div>
+              </div>
+              <div className="px-8 py-8 flex items-center gap-6">
+                <div className="p-3 bg-muted rounded-full">
+                  <MousePointerClick className="h-5 w-5 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="text-4xl font-black tabular-nums leading-none">
+                    {statsData.data.clickRate}%
+                  </p>
+                  <p className="mt-1.5 text-[10px] uppercase tracking-widest text-muted-foreground">
+                    Click Rate &middot; {statsData.data.clicked} clicks
+                  </p>
+                </div>
+              </div>
             </div>
           </>
         )}

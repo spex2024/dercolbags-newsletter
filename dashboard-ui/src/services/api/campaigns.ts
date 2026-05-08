@@ -17,10 +17,13 @@ export interface Campaign {
   updatedAt: string
   stats?: {
     totalRecipients: number
-    delivered: number
+    sent: number
+    failed: number
+    pending: number
     opened: number
     clicked: number
-    bounced: number
+    openRate: number
+    clickRate: number
   }
 }
 
@@ -96,4 +99,41 @@ export const campaignsApi = {
     api.post<{ success: boolean; message: string }>(
       `/api/v1/campaigns/${id}/cancel`,
     ),
+
+  getAnalytics: (brand?: Brand) =>
+    api.get<{
+      success: boolean
+      data: Array<{
+        id: string
+        name: string
+        brand: Brand
+        subject: string
+        status: string
+        sentAt: string | null
+        totalRecipients: number
+        sent: number
+        failed: number
+        opened: number
+        clicked: number
+        openRate: number
+        clickRate: number
+      }>
+    }>(`/api/v1/campaigns/analytics${brand ? `?brand=${brand}` : ""}`),
+
+  getStats: (id: string) =>
+    api.get<{
+      success: boolean
+      data: {
+        campaignId: string
+        status: string
+        totalRecipients: number
+        sent: number
+        failed: number
+        pending: number
+        opened: number
+        clicked: number
+        openRate: number
+        clickRate: number
+      }
+    }>(`/api/v1/campaigns/${id}/stats`),
 }

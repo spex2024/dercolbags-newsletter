@@ -65,13 +65,6 @@ function UsersPage() {
   const rolesList = rolesData?.data ?? []
 
   const [isAddOpen, setIsAddOpen] = useState(false)
-
-  useEffect(() => {
-    if (rolesList.length > 0 && !addData.role) {
-      const defaultRole = rolesList.find((r) => r.value === "manager")?.value ?? rolesList[0].value
-      setAddData((prev) => ({ ...prev, role: defaultRole }))
-    }
-  }, [rolesList, addData.role])
   const [addData, setAddData] = useState({
     name: "",
     email: "",
@@ -79,7 +72,6 @@ function UsersPage() {
     role: "",
     brandAccess: ["watpak"] as Brand[],
   })
-
   const [deleteUserId, setDeleteUserId] = useState<string | null>(null)
   const [editUserId, setEditUserId] = useState<string | null>(null)
   const [editData, setEditData] = useState({
@@ -88,6 +80,13 @@ function UsersPage() {
     role: "marketing_manager",
     brandAccess: [] as Brand[],
   })
+
+  useEffect(() => {
+    if (rolesList.length > 0 && !addData.role) {
+      const defaultRole = rolesList.find((r) => r.value === "manager")?.value ?? rolesList[0].value
+      setAddData((prev) => ({ ...prev, role: defaultRole }))
+    }
+  }, [rolesList, addData.role])
 
   const inviteMutation = useMutation({
     mutationFn: usersApi.create,

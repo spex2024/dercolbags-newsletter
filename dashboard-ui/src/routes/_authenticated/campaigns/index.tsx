@@ -21,7 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Plus, BarChart3, Send, X, Eye } from "lucide-react"
+import { Plus, BarChart3, Send, X, Eye, TrendingUp } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { format } from "date-fns"
 import { toast } from "sonner"
@@ -100,13 +100,23 @@ function CampaignsPage() {
             Create and manage email campaigns
           </p>
         </div>
-        <Button
-          className="mt-1 shadow-md hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all shrink-0"
-          onClick={() => navigate({ to: "/campaigns/new" })}
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Create Campaign
-        </Button>
+        <div className="flex gap-2 mt-1 shrink-0">
+          <Button
+            variant="outline"
+            className="shadow-sm hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
+            onClick={() => navigate({ to: "/campaigns/analytics" })}
+          >
+            <TrendingUp className="mr-2 h-4 w-4" />
+            Analytics
+          </Button>
+          <Button
+            className="shadow-md hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
+            onClick={() => navigate({ to: "/campaigns/new" })}
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Create Campaign
+          </Button>
+        </div>
       </div>
 
       <div className="flex gap-4">

@@ -67,6 +67,7 @@ export const Route = createFileRoute("/_authenticated/permissions")({
 
 const PAGE_ORDER: PageKey[] = [
   "dashboard",
+  "analytics",
   "subscribers",
   "campaigns",
   "templates",
@@ -75,12 +76,13 @@ const PAGE_ORDER: PageKey[] = [
 ]
 
 const PAGE_META: Record<PageKey, { icon: typeof LayoutDashboard; description: string; category: string }> = {
-  dashboard: { icon: LayoutDashboard, description: "Overview and analytics", category: "Analytics" },
-  subscribers: { icon: Users, description: "Subscriber list and management", category: "Audience" },
-  campaigns: { icon: Mail, description: "Email campaign creation and tracking", category: "Outbound" },
-  templates: { icon: FileText, description: "Email template builder", category: "Content" },
-  lists: { icon: List, description: "Mailing list management", category: "Audience" },
-  "import-export": { icon: Download, description: "Bulk import and export tools", category: "Tools" },
+  dashboard:       { icon: LayoutDashboard, description: "Overview and key metrics",                category: "Overview"  },
+  analytics:       { icon: BarChart3,       description: "Audience and email performance analytics", category: "Overview"  },
+  subscribers:     { icon: Users,           description: "Subscriber list and management",           category: "Audience"  },
+  campaigns:       { icon: Mail,            description: "Email campaign creation and tracking",     category: "Outbound"  },
+  templates:       { icon: FileText,        description: "Email template builder",                   category: "Content"   },
+  lists:           { icon: List,            description: "Mailing list management",                  category: "Audience"  },
+  "import-export": { icon: Download,        description: "Bulk import and export tools",             category: "Tools"     },
 }
 
 const ROLE_PRESETS = [

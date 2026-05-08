@@ -1,6 +1,6 @@
 import { eq, and } from "drizzle-orm";
 import { db } from "../db/client";
-import { trackingLinks, campaignRecipients, campaigns, subscribers } from "../db/schema";
+import { trackingLinks, campaignRecipients } from "../db/schema";
 import { AppError } from "../utils/errors";
 import { env } from "../config/env";
 
@@ -12,7 +12,7 @@ export async function createTrackingLink(
   subscriberId: string,
   originalUrl: string
 ): Promise<string> {
-  const hashedUrl = generateHash(originalUrl, recipientId);
+  const hashedUrl = await generateHash(originalUrl, recipientId);
 
   const existing = await db
     .select()
@@ -57,7 +57,7 @@ export async function replaceLinksWithTracking(html: string, campaignId: string,
   return result;
 }
 
-export async function injectTrackingPixel(html: string, campaignId: string, recipientId: string): string {
+export function injectTrackingPixel(html: string, campaignId: string, recipientId: string): string {
   const pixelUrl = `${TRACKING_DOMAIN}/track/open/${recipientId}`;
   const pixel = `<img src="${pixelUrl}" width="1" height="1" style="display:none;" alt="" />`;
 
@@ -67,11 +67,10 @@ export async function injectTrackingPixel(html: string, campaignId: string, reci
   return html + pixel;
 }
 
-function generateHash(url: string, recipientId: string): string {
-  const crypto = globalThis.crypto;
+async function generateHash(url: string, recipientId: string): Promise<string> {
   const data = `${url}-${recipientId}-${Date.now()}`;
-  const hash = crypto.subtle.digest("SHA-256", new TextEncoder().encode(data));
-  return Array.from(new Uint8Array(hash))
+  const hashBuffer = await globalThis.crypto.subtle.digest("SHA-256", new TextEncoder().encode(data));
+  return Array.from(new Uint8Array(hashBuffer))
     .map((b) => b.toString(16).padStart(2, "0"))
     .slice(0, 16)
     .join("");

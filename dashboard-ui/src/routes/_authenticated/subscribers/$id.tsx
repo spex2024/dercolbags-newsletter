@@ -1,9 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { requirePageAccess } from "@/lib/permissions"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { subscribersApi } from "@/services/api/subscribers"
-import { Loader2, ArrowLeft, Mail, Phone, MapPin, Globe, Calendar, Clock } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Loader2, ArrowLeft, Mail, Phone, MapPin, Globe, Calendar, Clock, TrendingUp, ShoppingBag } from "lucide-react"
 import { format } from "date-fns"
+import { toast } from "sonner"
 
 export const Route = createFileRoute("/_authenticated/subscribers/$id")({
   beforeLoad: ({ context }) => requirePageAccess(context, "subscribers"),
@@ -13,10 +15,22 @@ export const Route = createFileRoute("/_authenticated/subscribers/$id")({
 function SubscriberDetailPage() {
   const { id } = Route.useParams()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
 
   const { data, isLoading } = useQuery({
     queryKey: ["subscriber", id],
     queryFn: () => subscribersApi.get(id),
+  })
+
+  const statusMutation = useMutation({
+    mutationFn: (status: "new" | "contacted" | "converted" | "spam") =>
+      subscribersApi.updateStatus(id, { status }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["subscriber", id] })
+      queryClient.invalidateQueries({ queryKey: ["subscribers"] })
+      toast.success("Status updated")
+    },
+    onError: (err: Error) => toast.error(err.message || "Failed to update status"),
   })
 
   if (isLoading) {
@@ -152,6 +166,51 @@ function SubscriberDetailPage() {
             </p>
           </div>
         )}
+
+        {/* Status actions */}
+        <div className="px-8 py-6">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-bold mb-4">
+            Update Status
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={subscriber.status === "converted" || statusMutation.isPending}
+              className="shadow-sm hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
+              onClick={() => statusMutation.mutate("converted")}
+            >
+              {statusMutation.isPending ? (
+                <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <ShoppingBag className="mr-2 h-3.5 w-3.5" />
+              )}
+              Mark as Converted
+            </Button>
+
+            {subscriber.status === "converted" && (
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={statusMutation.isPending}
+                className="shadow-sm hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
+                onClick={() => statusMutation.mutate("contacted")}
+              >
+                {statusMutation.isPending ? (
+                  <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <TrendingUp className="mr-2 h-3.5 w-3.5" />
+                )}
+                Revert to Contacted
+              </Button>
+            )}
+          </div>
+          {subscriber.status === "converted" && (
+            <p className="mt-3 text-[11px] text-muted-foreground">
+              This subscriber has been marked as a customer.
+            </p>
+          )}
+        </div>
       </div>
     </div>
   )

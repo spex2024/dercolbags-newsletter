@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const PAGE_KEYS = [
   "dashboard",
+  "analytics",
   "subscribers",
   "campaigns",
   "templates",
@@ -13,6 +14,7 @@ export type PageKey = (typeof PAGE_KEYS)[number];
 
 export const PAGE_NAMES: Record<PageKey, string> = {
   dashboard: "Dashboard",
+  analytics: "Analytics",
   subscribers: "Subscribers",
   campaigns: "Campaigns",
   templates: "Templates",

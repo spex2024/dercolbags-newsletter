@@ -21,6 +21,7 @@ import { Route as AuthenticatedTemplatesIndexRouteImport } from './routes/_authe
 import { Route as AuthenticatedSubscribersIndexRouteImport } from './routes/_authenticated/subscribers/index'
 import { Route as AuthenticatedListsIndexRouteImport } from './routes/_authenticated/lists/index'
 import { Route as AuthenticatedCampaignsIndexRouteImport } from './routes/_authenticated/campaigns/index'
+import { Route as AuthenticatedAnalyticsIndexRouteImport } from './routes/_authenticated/analytics/index'
 import { Route as AuthenticatedTemplatesNewRouteImport } from './routes/_authenticated/templates/new'
 import { Route as AuthenticatedTemplatesIdRouteImport } from './routes/_authenticated/templates/$id'
 import { Route as AuthenticatedSubscribersNewRouteImport } from './routes/_authenticated/subscribers/new'
@@ -28,6 +29,7 @@ import { Route as AuthenticatedSubscribersIdRouteImport } from './routes/_authen
 import { Route as AuthenticatedListsNewRouteImport } from './routes/_authenticated/lists/new'
 import { Route as AuthenticatedListsIdRouteImport } from './routes/_authenticated/lists/$id'
 import { Route as AuthenticatedCampaignsNewRouteImport } from './routes/_authenticated/campaigns/new'
+import { Route as AuthenticatedCampaignsAnalyticsRouteImport } from './routes/_authenticated/campaigns/analytics'
 import { Route as AuthenticatedCampaignsIdRouteImport } from './routes/_authenticated/campaigns/$id'
 
 const LoginRoute = LoginRouteImport.update({
@@ -94,6 +96,12 @@ const AuthenticatedCampaignsIndexRoute =
     path: '/campaigns/',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedAnalyticsIndexRoute =
+  AuthenticatedAnalyticsIndexRouteImport.update({
+    id: '/analytics/',
+    path: '/analytics/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedTemplatesNewRoute =
   AuthenticatedTemplatesNewRouteImport.update({
     id: '/templates/new',
@@ -134,6 +142,12 @@ const AuthenticatedCampaignsNewRoute =
     path: '/campaigns/new',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedCampaignsAnalyticsRoute =
+  AuthenticatedCampaignsAnalyticsRouteImport.update({
+    id: '/campaigns/analytics',
+    path: '/campaigns/analytics',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedCampaignsIdRoute =
   AuthenticatedCampaignsIdRouteImport.update({
     id: '/campaigns/$id',
@@ -149,6 +163,7 @@ export interface FileRoutesByFullPath {
   '/import-export': typeof AuthenticatedImportExportRoute
   '/permissions': typeof AuthenticatedPermissionsRoute
   '/campaigns/$id': typeof AuthenticatedCampaignsIdRoute
+  '/campaigns/analytics': typeof AuthenticatedCampaignsAnalyticsRoute
   '/campaigns/new': typeof AuthenticatedCampaignsNewRoute
   '/lists/$id': typeof AuthenticatedListsIdRoute
   '/lists/new': typeof AuthenticatedListsNewRoute
@@ -156,6 +171,7 @@ export interface FileRoutesByFullPath {
   '/subscribers/new': typeof AuthenticatedSubscribersNewRoute
   '/templates/$id': typeof AuthenticatedTemplatesIdRoute
   '/templates/new': typeof AuthenticatedTemplatesNewRoute
+  '/analytics/': typeof AuthenticatedAnalyticsIndexRoute
   '/campaigns/': typeof AuthenticatedCampaignsIndexRoute
   '/lists/': typeof AuthenticatedListsIndexRoute
   '/subscribers/': typeof AuthenticatedSubscribersIndexRoute
@@ -170,6 +186,7 @@ export interface FileRoutesByTo {
   '/import-export': typeof AuthenticatedImportExportRoute
   '/permissions': typeof AuthenticatedPermissionsRoute
   '/campaigns/$id': typeof AuthenticatedCampaignsIdRoute
+  '/campaigns/analytics': typeof AuthenticatedCampaignsAnalyticsRoute
   '/campaigns/new': typeof AuthenticatedCampaignsNewRoute
   '/lists/$id': typeof AuthenticatedListsIdRoute
   '/lists/new': typeof AuthenticatedListsNewRoute
@@ -177,6 +194,7 @@ export interface FileRoutesByTo {
   '/subscribers/new': typeof AuthenticatedSubscribersNewRoute
   '/templates/$id': typeof AuthenticatedTemplatesIdRoute
   '/templates/new': typeof AuthenticatedTemplatesNewRoute
+  '/analytics': typeof AuthenticatedAnalyticsIndexRoute
   '/campaigns': typeof AuthenticatedCampaignsIndexRoute
   '/lists': typeof AuthenticatedListsIndexRoute
   '/subscribers': typeof AuthenticatedSubscribersIndexRoute
@@ -193,6 +211,7 @@ export interface FileRoutesById {
   '/_authenticated/import-export': typeof AuthenticatedImportExportRoute
   '/_authenticated/permissions': typeof AuthenticatedPermissionsRoute
   '/_authenticated/campaigns/$id': typeof AuthenticatedCampaignsIdRoute
+  '/_authenticated/campaigns/analytics': typeof AuthenticatedCampaignsAnalyticsRoute
   '/_authenticated/campaigns/new': typeof AuthenticatedCampaignsNewRoute
   '/_authenticated/lists/$id': typeof AuthenticatedListsIdRoute
   '/_authenticated/lists/new': typeof AuthenticatedListsNewRoute
@@ -200,6 +219,7 @@ export interface FileRoutesById {
   '/_authenticated/subscribers/new': typeof AuthenticatedSubscribersNewRoute
   '/_authenticated/templates/$id': typeof AuthenticatedTemplatesIdRoute
   '/_authenticated/templates/new': typeof AuthenticatedTemplatesNewRoute
+  '/_authenticated/analytics/': typeof AuthenticatedAnalyticsIndexRoute
   '/_authenticated/campaigns/': typeof AuthenticatedCampaignsIndexRoute
   '/_authenticated/lists/': typeof AuthenticatedListsIndexRoute
   '/_authenticated/subscribers/': typeof AuthenticatedSubscribersIndexRoute
@@ -216,6 +236,7 @@ export interface FileRouteTypes {
     | '/import-export'
     | '/permissions'
     | '/campaigns/$id'
+    | '/campaigns/analytics'
     | '/campaigns/new'
     | '/lists/$id'
     | '/lists/new'
@@ -223,6 +244,7 @@ export interface FileRouteTypes {
     | '/subscribers/new'
     | '/templates/$id'
     | '/templates/new'
+    | '/analytics/'
     | '/campaigns/'
     | '/lists/'
     | '/subscribers/'
@@ -237,6 +259,7 @@ export interface FileRouteTypes {
     | '/import-export'
     | '/permissions'
     | '/campaigns/$id'
+    | '/campaigns/analytics'
     | '/campaigns/new'
     | '/lists/$id'
     | '/lists/new'
@@ -244,6 +267,7 @@ export interface FileRouteTypes {
     | '/subscribers/new'
     | '/templates/$id'
     | '/templates/new'
+    | '/analytics'
     | '/campaigns'
     | '/lists'
     | '/subscribers'
@@ -259,6 +283,7 @@ export interface FileRouteTypes {
     | '/_authenticated/import-export'
     | '/_authenticated/permissions'
     | '/_authenticated/campaigns/$id'
+    | '/_authenticated/campaigns/analytics'
     | '/_authenticated/campaigns/new'
     | '/_authenticated/lists/$id'
     | '/_authenticated/lists/new'
@@ -266,6 +291,7 @@ export interface FileRouteTypes {
     | '/_authenticated/subscribers/new'
     | '/_authenticated/templates/$id'
     | '/_authenticated/templates/new'
+    | '/_authenticated/analytics/'
     | '/_authenticated/campaigns/'
     | '/_authenticated/lists/'
     | '/_authenticated/subscribers/'
@@ -366,6 +392,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCampaignsIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/analytics/': {
+      id: '/_authenticated/analytics/'
+      path: '/analytics'
+      fullPath: '/analytics/'
+      preLoaderRoute: typeof AuthenticatedAnalyticsIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/templates/new': {
       id: '/_authenticated/templates/new'
       path: '/templates/new'
@@ -415,6 +448,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCampaignsNewRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/campaigns/analytics': {
+      id: '/_authenticated/campaigns/analytics'
+      path: '/campaigns/analytics'
+      fullPath: '/campaigns/analytics'
+      preLoaderRoute: typeof AuthenticatedCampaignsAnalyticsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/campaigns/$id': {
       id: '/_authenticated/campaigns/$id'
       path: '/campaigns/$id'
@@ -430,6 +470,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedImportExportRoute: typeof AuthenticatedImportExportRoute
   AuthenticatedPermissionsRoute: typeof AuthenticatedPermissionsRoute
   AuthenticatedCampaignsIdRoute: typeof AuthenticatedCampaignsIdRoute
+  AuthenticatedCampaignsAnalyticsRoute: typeof AuthenticatedCampaignsAnalyticsRoute
   AuthenticatedCampaignsNewRoute: typeof AuthenticatedCampaignsNewRoute
   AuthenticatedListsIdRoute: typeof AuthenticatedListsIdRoute
   AuthenticatedListsNewRoute: typeof AuthenticatedListsNewRoute
@@ -437,6 +478,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedSubscribersNewRoute: typeof AuthenticatedSubscribersNewRoute
   AuthenticatedTemplatesIdRoute: typeof AuthenticatedTemplatesIdRoute
   AuthenticatedTemplatesNewRoute: typeof AuthenticatedTemplatesNewRoute
+  AuthenticatedAnalyticsIndexRoute: typeof AuthenticatedAnalyticsIndexRoute
   AuthenticatedCampaignsIndexRoute: typeof AuthenticatedCampaignsIndexRoute
   AuthenticatedListsIndexRoute: typeof AuthenticatedListsIndexRoute
   AuthenticatedSubscribersIndexRoute: typeof AuthenticatedSubscribersIndexRoute
@@ -449,6 +491,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedImportExportRoute: AuthenticatedImportExportRoute,
   AuthenticatedPermissionsRoute: AuthenticatedPermissionsRoute,
   AuthenticatedCampaignsIdRoute: AuthenticatedCampaignsIdRoute,
+  AuthenticatedCampaignsAnalyticsRoute: AuthenticatedCampaignsAnalyticsRoute,
   AuthenticatedCampaignsNewRoute: AuthenticatedCampaignsNewRoute,
   AuthenticatedListsIdRoute: AuthenticatedListsIdRoute,
   AuthenticatedListsNewRoute: AuthenticatedListsNewRoute,
@@ -456,6 +499,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedSubscribersNewRoute: AuthenticatedSubscribersNewRoute,
   AuthenticatedTemplatesIdRoute: AuthenticatedTemplatesIdRoute,
   AuthenticatedTemplatesNewRoute: AuthenticatedTemplatesNewRoute,
+  AuthenticatedAnalyticsIndexRoute: AuthenticatedAnalyticsIndexRoute,
   AuthenticatedCampaignsIndexRoute: AuthenticatedCampaignsIndexRoute,
   AuthenticatedListsIndexRoute: AuthenticatedListsIndexRoute,
   AuthenticatedSubscribersIndexRoute: AuthenticatedSubscribersIndexRoute,

@@ -29,6 +29,7 @@ export type PageKey =
   | "templates"
   | "lists"
   | "import-export"
+  | "analytics"
 
 export interface Role {
   id: string

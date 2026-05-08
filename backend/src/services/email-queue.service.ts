@@ -105,6 +105,19 @@ async function processEmailJob(job: typeof emailJobs.$inferSelect, campaign: typ
       .set({ status: "sent", sentAt: new Date(), providerResponse: result })
       .where(eq(campaignRecipients.id, job.recipientId));
 
+    // Advance subscriber status: new → contacted (never downgrade)
+    if (subscriber.status === "new") {
+      await db
+        .update(subscribers)
+        .set({ status: "contacted", lastEmailSentAt: new Date() })
+        .where(eq(subscribers.id, subscriber.id));
+    } else {
+      await db
+        .update(subscribers)
+        .set({ lastEmailSentAt: new Date() })
+        .where(eq(subscribers.id, subscriber.id));
+    }
+
     await db.update(emailJobs).set({ status: "completed", processedAt: new Date() }).where(eq(emailJobs.id, job.id));
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";

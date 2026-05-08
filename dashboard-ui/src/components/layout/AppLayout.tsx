@@ -27,6 +27,7 @@ import {
   PanelLeftClose,
   PanelLeft,
   ShieldCheck,
+  BarChart2,
   type LucideIcon,
 } from "lucide-react"
 import { canAccessPage } from "@/lib/permissions"
@@ -43,6 +44,7 @@ interface NavItem {
 
 const navigation: NavItem[] = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, pageKey: "dashboard" },
+  { name: "Analytics", href: "/analytics", icon: BarChart2, pageKey: "analytics" },
   { name: "Subscribers", href: "/subscribers", icon: Users, pageKey: "subscribers" },
   { name: "Campaigns", href: "/campaigns", icon: Mail, pageKey: "campaigns" },
   { name: "Templates", href: "/templates", icon: FileText, pageKey: "templates" },
