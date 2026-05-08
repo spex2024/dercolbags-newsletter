@@ -1,5 +1,6 @@
 import { Link, useLocation, useNavigate, useRouterState } from "@tanstack/react-router"
 import { useSession, signOut } from "@/lib/auth"
+import { useBrand } from "@/contexts/BrandContext"
 import { BrandSwitcher } from "@/components/BrandSwitcher"
 import { Button } from "@/components/ui/button"
 import {
@@ -28,11 +29,72 @@ import {
   PanelLeft,
   ShieldCheck,
   BarChart2,
+  ChevronRight,
   type LucideIcon,
 } from "lucide-react"
 import { canAccessPage } from "@/lib/permissions"
 import { Skeleton } from "@/components/ui/skeleton"
 import type { PageKey } from "@/services/api/types"
+
+const BRAND_META: Record<string, { logoSrc: string; name: string; short: string; accent: string }> = {
+  dercolbags: {
+    logoSrc: "https://res.cloudinary.com/ddwet1dzj/image/upload/v1777042366/dercolbags/DERCOLBAGS_LOGO_tolkgw.png",
+    name:    "DercolBags",
+    short:   "DC",
+    accent:  "#1a1a1a",
+  },
+  watpak: {
+    logoSrc: "/logos/logo-watpak.png",
+    name:    "WatPak",
+    short:   "WP",
+    accent:  "#b45309",
+  },
+}
+
+function BrandLogo({ brand, collapsed }: { brand: string; collapsed?: boolean }) {
+  const meta = BRAND_META[brand] ?? BRAND_META.dercolbags
+  const [imgFailed, setImgFailed] = useState(false)
+
+  if (collapsed) {
+    return imgFailed ? (
+      <div className="flex h-8 w-8 items-center justify-center bg-background text-foreground text-[11px] font-black shrink-0">
+        {meta.short}
+      </div>
+    ) : (
+      <img
+        src={meta.logoSrc}
+        alt={meta.name}
+        onError={() => setImgFailed(true)}
+        className="h-8 w-8 object-contain shrink-0"
+      />
+    )
+  }
+
+  return (
+    <div className="flex items-center gap-3 min-w-0">
+      {imgFailed ? (
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center bg-background text-foreground text-[11px] font-black">
+          {meta.short}
+        </div>
+      ) : (
+        <img
+          src={meta.logoSrc}
+          alt={meta.name}
+          onError={() => setImgFailed(true)}
+          className="h-11 w-auto max-w-[140px] object-contain shrink-0"
+        />
+      )}
+      <div className="min-w-0">
+        <p className="truncate text-[13px] font-black uppercase tracking-[0.1em] text-background leading-none">
+          {meta.name}
+        </p>
+        <p className="text-[10px] tracking-widest text-background/50 mt-0.5">Newsletter</p>
+      </div>
+    </div>
+  )
+}
+
+// ── Nav structure ─────────────────────────────────────────────────────────────
 
 interface NavItem {
   name: string
@@ -42,17 +104,22 @@ interface NavItem {
   ownerAdminOnly?: boolean
 }
 
-const navigation: NavItem[] = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, pageKey: "dashboard" },
-  { name: "Analytics", href: "/analytics", icon: BarChart2, pageKey: "analytics" },
-  { name: "Subscribers", href: "/subscribers", icon: Users, pageKey: "subscribers" },
-  { name: "Campaigns", href: "/campaigns", icon: Mail, pageKey: "campaigns" },
-  { name: "Templates", href: "/templates", icon: FileText, pageKey: "templates" },
-  { name: "Mailing Lists", href: "/lists", icon: List, pageKey: "lists" },
-  { name: "Import / Export", href: "/import-export", icon: Download, pageKey: "import-export" },
-  { name: "Users", href: "/users", icon: Settings, ownerAdminOnly: true },
+const mainNav: NavItem[] = [
+  { name: "Dashboard",     href: "/dashboard",    icon: LayoutDashboard, pageKey: "dashboard" },
+  { name: "Analytics",     href: "/analytics",    icon: BarChart2,       pageKey: "analytics" },
+  { name: "Subscribers",   href: "/subscribers",  icon: Users,           pageKey: "subscribers" },
+  { name: "Campaigns",     href: "/campaigns",    icon: Mail,            pageKey: "campaigns" },
+  { name: "Templates",     href: "/templates",    icon: FileText,        pageKey: "templates" },
+  { name: "Mailing Lists", href: "/lists",        icon: List,            pageKey: "lists" },
+  { name: "Import / Export", href: "/import-export", icon: Download,    pageKey: "import-export" },
+]
+
+const adminNav: NavItem[] = [
+  { name: "Users",       href: "/users",       icon: Settings,    ownerAdminOnly: true },
   { name: "Permissions", href: "/permissions", icon: ShieldCheck, ownerAdminOnly: true },
 ]
+
+// ── NavLink ───────────────────────────────────────────────────────────────────
 
 function NavLink({
   item,
@@ -70,136 +137,159 @@ function NavLink({
       to={item.href}
       onClick={onClick}
       title={isCollapsed ? item.name : undefined}
-      className={`flex items-center gap-3 border-l-[3px] px-3 py-2.5 text-[11px] font-bold uppercase tracking-[0.12em] transition-colors ${
-        isActive
-          ? "border-foreground bg-foreground/8 text-foreground"
-          : "border-transparent text-muted-foreground hover:border-foreground/30 hover:bg-foreground/4 hover:text-foreground"
-      } ${isCollapsed ? "justify-center px-0 border-l-0 border-b-[3px] border-t-0 border-r-0" : ""}`}
+      className={`group relative flex items-center gap-3 rounded-none transition-all duration-150
+        ${isCollapsed ? "justify-center px-0 py-3" : "px-4 py-2.5"}
+        ${isActive
+          ? "bg-foreground text-background"
+          : "text-muted-foreground hover:bg-foreground/6 hover:text-foreground"
+        }`}
     >
-      <item.icon className="h-4 w-4 shrink-0" />
-      {!isCollapsed && <span className="truncate">{item.name}</span>}
+      {/* Active indicator bar */}
+      {!isCollapsed && isActive && (
+        <span className="absolute left-0 top-1 bottom-1 w-[3px] bg-background" />
+      )}
+      <item.icon className={`h-4 w-4 shrink-0 ${isActive ? "text-background" : ""}`} />
+      {!isCollapsed && (
+        <span className="text-[11px] font-bold uppercase tracking-[0.1em] truncate flex-1">
+          {item.name}
+        </span>
+      )}
+      {!isCollapsed && isActive && (
+        <ChevronRight className="h-3 w-3 text-background/50 shrink-0" />
+      )}
     </Link>
   )
 }
 
+// ── Sidebar content ───────────────────────────────────────────────────────────
+
 function SidebarContent({ onNavigate, isCollapsed }: { onNavigate?: () => void; isCollapsed?: boolean }) {
-  const location = useLocation()
-  const { data: session, isPending: sessionLoading } = useSession()
+  const location   = useLocation()
   const routeState = useRouterState()
-  const role = (session?.user as any)?.role as string | undefined
+  const { data: session, isPending: sessionLoading } = useSession()
+  const { currentBrand } = useBrand()
+
+  const role            = (session?.user as any)?.role as string | undefined
   const pagePermissions = (routeState as any)?.loaderData?.pagePermissions ?? []
 
-  const visibleNav = navigation.filter((item) => {
+  const visibleMain  = mainNav.filter((item) => {
     if (!role) return false
-    if (item.ownerAdminOnly) return role === "owner" || role === "admin"
     if (item.pageKey) return canAccessPage(role, item.pageKey, pagePermissions)
     return true
   })
+  const visibleAdmin = adminNav.filter((item) => {
+    if (!role) return false
+    return role === "owner" || role === "admin"
+  })
 
   return (
-    <>
-      {/* Logo — inverted */}
-      <div className={`bg-foreground text-background border-b flex items-center gap-3 ${isCollapsed ? "justify-center p-3" : "px-4 py-4"}`}>
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center bg-background text-foreground font-black text-xs">
-          DC
-        </div>
-        {!isCollapsed && (
-          <div className="min-w-0">
-            <p className="truncate text-[11px] font-black uppercase tracking-[0.15em] text-background">
-              DercolBags
-            </p>
-            <p className="truncate text-[10px] tracking-wider text-background/50">
-              Newsletter
-            </p>
-          </div>
-        )}
+    <div className="flex h-full flex-col overflow-hidden">
+
+      {/* ── Brand logo area ── */}
+      <div className={`flex items-center border-b-2 border-foreground/10 bg-foreground
+        ${isCollapsed ? "justify-center p-3 min-h-[56px]" : "px-4 py-3 min-h-[64px]"}`}
+      >
+        <BrandLogo brand={currentBrand} collapsed={isCollapsed} />
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 py-3">
+      {/* ── Navigation ── */}
+      <nav className="flex-1 overflow-y-auto py-2 space-y-0.5 px-2">
+
         {sessionLoading
           ? Array.from({ length: 7 }).map((_, i) => (
-              <div
-                key={i}
-                className={`flex items-center gap-3 px-3 py-2.5 ${isCollapsed ? "justify-center px-0" : ""}`}
-              >
+              <div key={i} className={`flex items-center gap-3 px-2 py-2.5 ${isCollapsed ? "justify-center" : ""}`}>
                 <Skeleton className="h-4 w-4 shrink-0" />
-                {!isCollapsed && <Skeleton className="h-3 flex-1" style={{ width: `${55 + (i % 3) * 20}%` }} />}
+                {!isCollapsed && <Skeleton className="h-3" style={{ width: `${50 + (i % 3) * 20}%` }} />}
               </div>
             ))
-          : visibleNav.map((item) => {
-              const isActive = location.pathname.startsWith(item.href)
-              return (
+          : (
+            <>
+              {!isCollapsed && (
+                <p className="px-2 pb-1 text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">
+                  Main
+                </p>
+              )}
+              {visibleMain.map((item) => (
                 <NavLink
                   key={item.name}
                   item={item}
-                  isActive={isActive}
+                  isActive={location.pathname.startsWith(item.href)}
                   onClick={onNavigate}
                   isCollapsed={isCollapsed}
                 />
-              )
-            })}
+              ))}
+
+              {visibleAdmin.length > 0 && (
+                <>
+                  {!isCollapsed
+                    ? <p className="mt-4 px-2 pb-1 text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">Admin</p>
+                    : <div className="my-2 mx-2 border-t border-foreground/10" />
+                  }
+                  {visibleAdmin.map((item) => (
+                    <NavLink
+                      key={item.name}
+                      item={item}
+                      isActive={location.pathname.startsWith(item.href)}
+                      onClick={onNavigate}
+                      isCollapsed={isCollapsed}
+                    />
+                  ))}
+                </>
+              )}
+            </>
+          )
+        }
       </nav>
 
-      {/* Footer */}
+      {/* ── Footer ── */}
       {!isCollapsed && (
-        <div className="border-t px-4 py-3">
-          <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
-            © {new Date().getFullYear()} DercolBags
+        <div className="border-t border-foreground/10 px-4 py-3">
+          <p className="text-[10px] text-muted-foreground/50 uppercase tracking-widest">
+            © {new Date().getFullYear()} {BRAND_META[currentBrand]?.name ?? "DercolBags"}
           </p>
         </div>
       )}
-    </>
+    </div>
   )
 }
+
+// ── App layout ────────────────────────────────────────────────────────────────
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const { data: session, isPending: sessionLoading } = useSession()
   const navigate = useNavigate()
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [isCollapsed, setIsCollapsed] = useState(false)
+  const [sidebarOpen,  setSidebarOpen]  = useState(false)
+  const [isCollapsed,  setIsCollapsed]  = useState(false)
 
-  const userName = session?.user?.name || "User"
-  const userEmail = session?.user?.email || ""
+  const userName    = session?.user?.name  || "User"
+  const userEmail   = session?.user?.email || ""
+  const userRole    = (session?.user as any)?.role as string | undefined
   const userInitial = userName[0]?.toUpperCase() || "U"
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Mobile Sidebar */}
+
+      {/* Mobile sidebar */}
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-        <SheetContent side="left" className="w-64 p-0">
-          <div className="flex h-full flex-col">
-            <SidebarContent onNavigate={() => setSidebarOpen(false)} />
-          </div>
+        <SheetContent side="left" className="w-64 p-0 border-r-2">
+          <SidebarContent onNavigate={() => setSidebarOpen(false)} />
         </SheetContent>
       </Sheet>
 
-      {/* Desktop Sidebar */}
-      <aside
-        className={`fixed inset-y-0 left-0 z-30 hidden flex-col border-r-2 bg-card md:flex transition-all duration-200 ${
-          isCollapsed ? "w-14" : "w-60"
-        }`}
-      >
-        <div className="flex h-full flex-col">
-          <SidebarContent isCollapsed={isCollapsed} />
-        </div>
+      {/* Desktop sidebar */}
+      <aside className={`fixed inset-y-0 left-0 z-30 hidden flex-col border-r-2 bg-card md:flex transition-all duration-200 ${isCollapsed ? "w-14" : "w-60"}`}>
+        <SidebarContent isCollapsed={isCollapsed} />
       </aside>
 
-      {/* Main Content */}
+      {/* Main */}
       <div className={`transition-all duration-200 ${isCollapsed ? "md:pl-14" : "md:pl-60"}`}>
-        {/* Top Bar */}
+
+        {/* Top bar */}
         <header className="sticky top-0 z-20 flex h-12 items-center justify-between border-b-2 bg-card px-4 sm:px-6">
           <div className="flex items-center gap-2">
-            {/* Mobile menu */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden"
-              onClick={() => setSidebarOpen(true)}
-            >
+            <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setSidebarOpen(true)}>
               <Menu className="h-4 w-4" />
             </Button>
-            {/* Desktop collapse */}
             <Button
               variant="ghost"
               size="icon"
@@ -207,16 +297,12 @@ export function AppLayout({ children }: { children: ReactNode }) {
               onClick={() => setIsCollapsed(!isCollapsed)}
               title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
-              {isCollapsed
-                ? <PanelLeft className="h-4 w-4" />
-                : <PanelLeftClose className="h-4 w-4" />
-              }
+              {isCollapsed ? <PanelLeft className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
             </Button>
           </div>
 
           <div className="flex items-center gap-3">
             <BrandSwitcher />
-
             <div className="h-5 w-px bg-border" />
 
             {sessionLoading ? (
@@ -230,25 +316,27 @@ export function AppLayout({ children }: { children: ReactNode }) {
                     </AvatarFallback>
                   </Avatar>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-52" align="end">
+                <DropdownMenuContent className="w-56" align="end">
                   <DropdownMenuGroup>
                     <DropdownMenuLabel className="font-normal">
                       <div className="flex flex-col gap-0.5">
-                        <p className="text-xs font-bold uppercase tracking-wider">{userName}</p>
+                        <p className="text-xs font-black uppercase tracking-wider">{userName}</p>
                         <p className="text-[11px] text-muted-foreground">{userEmail}</p>
+                        {userRole && (
+                          <span className="mt-1 inline-block text-[9px] font-bold uppercase tracking-widest bg-foreground/8 text-foreground px-1.5 py-0.5 w-fit">
+                            {userRole.replace(/_/g, " ")}
+                          </span>
+                        )}
                       </div>
                     </DropdownMenuLabel>
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    onClick={async () => {
-                      await signOut()
-                      navigate({ to: "/login" })
-                    }}
+                    onClick={async () => { await signOut(); navigate({ to: "/login" }) }}
                     className="text-destructive focus:text-destructive"
                   >
                     <LogOut className="mr-2 h-4 w-4" />
-                    <span>Log out</span>
+                    Log out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -256,7 +344,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        {/* Page Content */}
+        {/* Page content */}
         <main className="p-4 sm:p-6 lg:p-8">{children}</main>
       </div>
     </div>
