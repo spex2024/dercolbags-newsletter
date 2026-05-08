@@ -30,7 +30,7 @@ import {
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Loader2, Check, Eye, Pencil } from "lucide-react"
+import { ArrowLeft, Loader2, Check, Eye, Pencil, ChevronDown } from "lucide-react"
 import { toast } from "sonner"
 import type { TemplateCategory, TemplateKey } from "@/services/api/types"
 
@@ -40,6 +40,29 @@ export const Route = createFileRoute("/_authenticated/templates/new")({
 })
 
 type Step = "select" | "design"
+
+const SUGGESTED_KEYS = [
+  { key: "welcome_email",         label: "Welcome Email" },
+  { key: "monthly_newsletter",    label: "Monthly Newsletter" },
+  { key: "flash_sale",            label: "Flash Sale" },
+  { key: "product_launch",        label: "Product Launch" },
+  { key: "re_engagement",         label: "Re-engagement" },
+  { key: "event_invite",          label: "Event Invite" },
+  { key: "thank_you",             label: "Thank You" },
+  { key: "abandoned_cart",        label: "Abandoned Cart" },
+  { key: "loyalty_reward",        label: "Loyalty Reward" },
+  { key: "feedback_survey",       label: "Feedback Survey" },
+  { key: "referral_program",      label: "Referral Program" },
+  { key: "seasonal_campaign",     label: "Seasonal Campaign" },
+  { key: "back_in_stock",         label: "Back in Stock" },
+  { key: "weekly_digest",         label: "Weekly Digest" },
+  { key: "birthday_special",      label: "Birthday Special" },
+  { key: "content_roundup",       label: "Content Roundup" },
+  { key: "announcement",          label: "Announcement" },
+  { key: "order_confirmation",    label: "Order Confirmation" },
+  { key: "promo_code",            label: "Promo Code" },
+  { key: "new_collection",        label: "New Collection" },
+]
 
 function generatePreviewHtml(design: Record<string, unknown>): string {
   const body = design.body as any
@@ -126,6 +149,7 @@ function NewTemplatePage() {
 
   const [name, setName] = useState("")
   const [templateKey, setTemplateKey] = useState("")
+  const [keyDropdownOpen, setKeyDropdownOpen] = useState(false)
   const [subject, setSubject] = useState("")
   const [category, setCategory] = useState<TemplateCategory>("campaign")
 
@@ -339,18 +363,62 @@ function NewTemplatePage() {
                   <Label className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
                     Template Key <span className="text-destructive">*</span>
                   </Label>
-                  <Input
-                    placeholder="e.g. may_day_promo"
-                    value={templateKey}
-                    onChange={(e) =>
-                      setTemplateKey(
-                        e.target.value.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "")
-                      )
-                    }
-                    className="font-mono text-sm"
-                  />
-                  <p className="text-[11px] text-muted-foreground leading-relaxed">
-                    A unique identifier for this template. Lowercase letters, numbers and underscores only — e.g. <code className="bg-muted px-1 rounded text-[10px]">welcome_new_user</code>
+                  {/* Combobox — select from suggestions OR type a custom key */}
+                  <div className="relative">
+                    <div className="flex border-2 border-input focus-within:border-foreground transition-colors">
+                      <input
+                        className="flex-1 bg-transparent px-3 py-2 text-sm font-mono outline-none placeholder:text-muted-foreground"
+                        placeholder="e.g. may_day_promo"
+                        value={templateKey}
+                        onChange={(e) =>
+                          setTemplateKey(
+                            e.target.value.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "")
+                          )
+                        }
+                        onFocus={() => setKeyDropdownOpen(true)}
+                        onBlur={() => setTimeout(() => setKeyDropdownOpen(false), 150)}
+                      />
+                      <button
+                        type="button"
+                        tabIndex={-1}
+                        className="px-2 text-muted-foreground hover:text-foreground transition-colors"
+                        onClick={() => setKeyDropdownOpen((v) => !v)}
+                      >
+                        <ChevronDown className="h-4 w-4" />
+                      </button>
+                    </div>
+
+                    {keyDropdownOpen && (
+                      <div className="absolute z-50 left-0 right-0 top-full mt-1 border-2 border-foreground bg-background shadow-[4px_4px_0px_0px_oklch(0.1_0_0)] max-h-52 overflow-y-auto">
+                        <div className="px-3 py-2 border-b border-foreground/10">
+                          <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Common Keys</p>
+                        </div>
+                        {SUGGESTED_KEYS
+                          .filter((s) => !templateKey || s.key.includes(templateKey) || s.label.toLowerCase().includes(templateKey))
+                          .map((s) => (
+                            <button
+                              key={s.key}
+                              type="button"
+                              className="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-muted/40 transition-colors"
+                              onMouseDown={() => setTemplateKey(s.key)}
+                            >
+                              <span className="text-sm font-medium">{s.label}</span>
+                              <code className="text-[11px] text-muted-foreground font-mono">{s.key}</code>
+                            </button>
+                          ))
+                        }
+                        {templateKey && !SUGGESTED_KEYS.some((s) => s.key === templateKey) && (
+                          <div className="px-3 py-2 border-t border-foreground/10 bg-muted/20">
+                            <p className="text-[11px] text-muted-foreground">
+                              Custom key: <code className="font-mono text-foreground">{templateKey}</code>
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">
+                    Pick a suggestion or type your own — lowercase and underscores only.
                   </p>
                 </div>
 

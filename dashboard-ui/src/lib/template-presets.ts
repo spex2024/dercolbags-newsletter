@@ -124,7 +124,7 @@ function footer(id: string) {
   )
 }
 
-// Inverted black brand header
+// Style A — inverted black full-width header (most templates)
 function brandHeader(id: string, subtitle = "") {
   return {
     id: `${id}-col`,
@@ -141,6 +141,52 @@ function brandHeader(id: string, subtitle = "") {
       padding: "0px",
       _meta: { htmlID: `${id}-col`, htmlClassNames: "u_column" },
     },
+  }
+}
+
+// Style B — slim light header, brand name left-aligned with a black left border
+function brandHeaderSlim(id: string, label = "") {
+  return {
+    id: `${id}-col`,
+    contents: [
+      textBlock(
+        `${id}-text`,
+        `<p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:4px;color:#999999;margin:0 0 4px;">${label || "Newsletter"}</p>
+         <p style="font-size:18px;font-weight:900;color:#000000;text-transform:uppercase;letter-spacing:0.5px;margin:0;border-left:4px solid #000;padding-left:12px;">{{brandName}}</p>`,
+        "24px 40px",
+      ),
+    ],
+    values: { backgroundColor: "#ffffff", padding: "0px", _meta: { htmlID: `${id}-col`, htmlClassNames: "u_column" } },
+  }
+}
+
+// Style C — centered minimal brand line, no background
+function brandHeaderMinimal(id: string) {
+  return {
+    id: `${id}-col`,
+    contents: [
+      textBlock(
+        `${id}-text`,
+        `<p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:5px;color:#000000;text-align:center;margin:0;">— {{brandName}} —</p>`,
+        "20px 40px 16px",
+      ),
+    ],
+    values: { backgroundColor: "#ffffff", padding: "0px", _meta: { htmlID: `${id}-col`, htmlClassNames: "u_column" } },
+  }
+}
+
+// Style D — brand name inline at top-right as a small label (no row background)
+function brandHeaderInline(id: string) {
+  return {
+    id: `${id}-col`,
+    contents: [
+      textBlock(
+        `${id}-text`,
+        `<p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:4px;color:#999999;text-align:right;margin:0;">{{brandName}}</p>`,
+        "16px 40px 8px",
+      ),
+    ],
+    values: { backgroundColor: "#ffffff", padding: "0px", _meta: { htmlID: `${id}-col`, htmlClassNames: "u_column" } },
   }
 }
 
@@ -215,7 +261,7 @@ export const presetTemplates: PresetTemplate[] = [
       counters: { u_row: 6, u_column: 6, u_content_text: 6, u_content_button: 1, u_content_divider: 2 },
       body: {
         rows: [
-          row("r-nl-header", [brandHeader("nl-hdr", "Monthly Update")], "0px"),
+          row("r-nl-header", [brandHeaderSlim("nl-hdr", "Monthly Update")], "0px"),
           row("r-nl-hero", [col("c-nl-hero", [
             textBlock("t-nl-label",
               `<p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:4px;color:#999999;text-align:center;margin:0;">{{subject}}</p>`,
@@ -353,7 +399,7 @@ export const presetTemplates: PresetTemplate[] = [
       counters: { u_row: 4, u_column: 4, u_content_text: 4, u_content_button: 1, u_content_divider: 1 },
       body: {
         rows: [
-          row("r-re-header", [brandHeader("re-hdr")], "0px"),
+          row("r-re-header", [brandHeaderMinimal("re-hdr")], "0px"),
           row("r-re-hero", [col("c-re-hero", [
             textBlock("t-re-big",
               `<p style="font-size:42px;font-weight:900;color:#000000;text-transform:uppercase;letter-spacing:-1.5px;text-align:center;line-height:110%;margin:0;">We Miss You,<br/>{{name}}.</p>`,
@@ -386,7 +432,7 @@ export const presetTemplates: PresetTemplate[] = [
       counters: { u_row: 5, u_column: 5, u_content_text: 6, u_content_button: 1, u_content_divider: 2 },
       body: {
         rows: [
-          row("r-ev-header", [brandHeader("ev-hdr", "You're Invited")], "0px"),
+          row("r-ev-header", [brandHeaderSlim("ev-hdr", "You're Invited")], "0px"),
           row("r-ev-hero", [col("c-ev-hero", [
             textBlock("t-ev-label",
               `<p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:4px;color:#999999;text-align:center;margin:0;">Special Event</p>`,
@@ -463,6 +509,7 @@ export const presetTemplates: PresetTemplate[] = [
       counters: { u_row: 2, u_column: 2, u_content_text: 2 },
       body: {
         rows: [
+          row("r-pt-header", [brandHeaderInline("pt-hdr")], "0px"),
           row("r-pt-body", [col("c-pt-body", [
             textBlock("t-pt-body",
               `<p style="font-size:15px;font-weight:700;color:#000000;">Hi {{name}},</p>
@@ -615,7 +662,7 @@ export const presetTemplates: PresetTemplate[] = [
       counters: { u_row: 5, u_column: 5, u_content_text: 5, u_content_button: 1, u_content_divider: 2 },
       body: {
         rows: [
-          row("r-ref-header", [brandHeader("ref-hdr", "Referral Programme")], "0px"),
+          row("r-ref-header", [brandHeaderMinimal("ref-hdr")], "0px"),
           row("r-ref-hero", [col("c-ref-hero", [
             textBlock("t-ref-title",
               `<p style="font-size:34px;font-weight:900;color:#000000;text-transform:uppercase;letter-spacing:-1px;text-align:center;line-height:110%;margin:0;">Refer a Friend.<br/>Both of You Win.</p>`,
@@ -709,7 +756,7 @@ export const presetTemplates: PresetTemplate[] = [
       counters: { u_row: 4, u_column: 6, u_content_text: 6, u_content_button: 2, u_content_divider: 1 },
       body: {
         rows: [
-          row("r-tc-header", [brandHeader("tc-hdr", "Featured")], "0px"),
+          row("r-tc-header", [brandHeaderInline("tc-hdr")], "0px"),
           row("r-tc-intro", [col("c-tc-intro", [
             textBlock("t-tc-intro",
               `<p style="font-size:24px;font-weight:900;color:#000000;text-transform:uppercase;letter-spacing:-0.5px;text-align:center;line-height:120%;margin:0;">Two Things<br/>Worth Your Attention</p>`,
@@ -816,7 +863,7 @@ export const presetTemplates: PresetTemplate[] = [
       counters: { u_row: 7, u_column: 7, u_content_text: 8, u_content_button: 1, u_content_divider: 4 },
       body: {
         rows: [
-          row("r-wd-header", [brandHeader("wd-hdr", "Weekly Digest")], "0px"),
+          row("r-wd-header", [brandHeaderSlim("wd-hdr", "Weekly Digest")], "0px"),
           row("r-wd-intro", [col("c-wd-intro", [
             textBlock("t-wd-date",
               `<p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:4px;color:#999999;text-align:center;margin:0;">This Week's Highlights</p>`,
@@ -956,7 +1003,7 @@ export const presetTemplates: PresetTemplate[] = [
       counters: { u_row: 7, u_column: 7, u_content_text: 8, u_content_button: 1, u_content_divider: 5 },
       body: {
         rows: [
-          row("r-cr-header", [brandHeader("cr-hdr", "Curated for You")], "0px"),
+          row("r-cr-header", [brandHeaderMinimal("cr-hdr")], "0px"),
           row("r-cr-intro", [col("c-cr-intro", [
             textBlock("t-cr-intro",
               `<p style="font-size:22px;font-weight:900;color:#000000;text-transform:uppercase;letter-spacing:-0.5px;text-align:center;margin:0;">This Week's Reading List</p>
