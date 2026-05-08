@@ -4,11 +4,12 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { authClient, signIn } from "@/lib/auth"
-import { Loader2, Mail, Lock } from "lucide-react"
+import { Loader2, Mail, Lock, ShieldAlert } from "lucide-react"
 import { z } from "zod"
 
 const loginSearchSchema = z.object({
   redirect: z.string().optional(),
+  reason:   z.string().optional(),
 })
 
 export const Route = createFileRoute("/login")({
@@ -30,7 +31,7 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const navigate = useNavigate()
-  const { redirect: redirectTo } = Route.useSearch()
+  const { redirect: redirectTo, reason } = Route.useSearch()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -242,6 +243,17 @@ function LoginPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              {reason === "timeout" && (
+                <div className="border-2 border-foreground p-4 flex items-start gap-3 bg-muted/40">
+                  <ShieldAlert className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-semibold">Session expired</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      You were logged out after 50 minutes of inactivity. Sign in to continue.
+                    </p>
+                  </div>
+                </div>
+              )}
               {error && (
                 <div className="border border-destructive/20 bg-destructive/5 p-3 text-sm text-destructive">
                   {error}

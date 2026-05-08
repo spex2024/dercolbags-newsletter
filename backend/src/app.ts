@@ -11,6 +11,7 @@ import {
   rateLimit,
   LOGIN_RATE_LIMIT,
   PASSWORD_RESET_RATE_LIMIT,
+  API_RATE_LIMIT,
 } from "./middlewares/rate-limit.middleware";
 import { startScheduler, recoverStuckCampaigns } from "./services/email-queue.service";
 import { createRouteHandler } from "uploadthing/server";
@@ -42,13 +43,17 @@ app.post("/api/auth/sign-up/email", (c) => {
   );
 });
 
-// ─── Rate Limiting for Auth ─────────────────────────────────────────────────
+// ─── Rate Limiting ──────────────────────────────────────────────────────────
 
-app.use("/api/auth/sign-in/*", rateLimit(LOGIN_RATE_LIMIT));
-app.use("/api/auth/sign-in/email", rateLimit(LOGIN_RATE_LIMIT));
+// General API rate limit (all authenticated API routes)
+app.use("/api/v1/*", rateLimit(API_RATE_LIMIT));
+
+// Stricter limits on auth endpoints
+app.use("/api/auth/sign-in/*",       rateLimit(LOGIN_RATE_LIMIT));
+app.use("/api/auth/sign-in/email",   rateLimit(LOGIN_RATE_LIMIT));
 app.use("/api/auth/forgot-password", rateLimit(PASSWORD_RESET_RATE_LIMIT));
 app.use("/api/auth/forgot-password/email", rateLimit(PASSWORD_RESET_RATE_LIMIT));
-app.use("/api/auth/reset-password", rateLimit(PASSWORD_RESET_RATE_LIMIT));
+app.use("/api/auth/reset-password",  rateLimit(PASSWORD_RESET_RATE_LIMIT));
 
 // ─── Better Auth Handler ──────────────────────────────────────────────────────
 

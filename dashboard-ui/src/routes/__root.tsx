@@ -10,6 +10,7 @@ import { TanStackDevtools } from "@tanstack/react-devtools"
 import { QueryClientProvider } from "@tanstack/react-query"
 import { queryClient } from "@/lib/api"
 import { BrandProvider } from "@/contexts/BrandContext"
+import { InactivityWatcher } from "@/components/InactivityWatcher"
 import { Toaster } from "@/components/ui/sonner"
 import { AlertTriangle, RotateCcw, Home } from "lucide-react"
 
@@ -136,6 +137,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrandProvider>
+        <InactivityWatcher />
         <Outlet />
         <Toaster richColors position="top-right" />
       </BrandProvider>
