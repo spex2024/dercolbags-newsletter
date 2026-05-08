@@ -13,7 +13,8 @@ export type UserRole =
   | "admin"
   | "marketing_manager"
   | "sales_support"
-export type TemplateKey =
+// System-reserved keys — custom campaign templates can use any snake_case string
+export type SystemTemplateKey =
   | "subscriber_confirmation"
   | "unsubscribe_confirmation"
   | "user_invite"
@@ -21,6 +22,8 @@ export type TemplateKey =
   | "campaign_default"
   | "campaign_test"
   | "admin_new_subscriber_notification"
+
+export type TemplateKey = SystemTemplateKey | (string & {})
 
 export type PageKey =
   | "dashboard"

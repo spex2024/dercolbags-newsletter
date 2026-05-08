@@ -113,8 +113,10 @@ export async function updateTemplate(id: string, input: UpdateEmailTemplateInput
   const [updated] = await db
     .update(emailTemplates)
     .set({
-      ...(input.name && { name: input.name.trim() }),
-      ...(input.subject && { subject: input.subject.trim() }),
+      ...(input.name        && { name: input.name.trim() }),
+      ...(input.subject     && { subject: input.subject.trim() }),
+      ...(input.templateKey && { templateKey: input.templateKey }),
+      ...(input.category    && { category: input.category }),
       ...(input.htmlContent && { htmlContent: sanitizeHtml(input.htmlContent) }),
       ...(input.plainTextContent !== undefined && { plainTextContent: input.plainTextContent?.trim() ?? null }),
       ...(input.designJson !== undefined && { designJson: input.designJson }),

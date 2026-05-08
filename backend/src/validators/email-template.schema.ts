@@ -33,7 +33,11 @@ export const templateVariablesSchema = z.object({
 
 export const createEmailTemplateSchema = z.object({
   brand: z.enum(["watpak", "dercolbags"]),
-  templateKey: z.enum(TEMPLATE_KEYS),
+  templateKey: z
+    .string()
+    .min(1, "Template key is required")
+    .max(100)
+    .regex(/^[a-z][a-z0-9_]*$/, "Key must be lowercase letters, numbers, and underscores (e.g. my_template)"),
   name: z.string().trim().min(1, "Name is required").max(100),
   subject: z.string().trim().min(1, "Subject is required").max(200),
   htmlContent: z.string().trim().min(1, "HTML content is required"),
@@ -43,11 +47,13 @@ export const createEmailTemplateSchema = z.object({
 });
 
 export const updateEmailTemplateSchema = z.object({
-  name: z.string().trim().min(1).max(100).optional(),
-  subject: z.string().trim().min(1).max(200).optional(),
-  htmlContent: z.string().trim().min(1).optional(),
+  name:             z.string().trim().min(1).max(100).optional(),
+  subject:          z.string().trim().min(1).max(200).optional(),
+  templateKey:      z.string().min(1).max(100).regex(/^[a-z][a-z0-9_]*$/).optional(),
+  category:         z.enum(TEMPLATE_CATEGORIES).optional(),
+  htmlContent:      z.string().trim().min(1).optional(),
   plainTextContent: z.string().trim().optional(),
-  designJson: z.record(z.unknown()).optional(),
+  designJson:       z.record(z.unknown()).optional(),
 });
 
 export const updateTemplateStatusSchema = z.object({

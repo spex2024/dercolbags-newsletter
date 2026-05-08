@@ -88,6 +88,8 @@ export const emailTemplatesApi = {
     data: {
       name?: string
       subject?: string
+      templateKey?: string
+      category?: TemplateCategory
       htmlContent?: string
       plainTextContent?: string
       designJson?: Record<string, unknown>
