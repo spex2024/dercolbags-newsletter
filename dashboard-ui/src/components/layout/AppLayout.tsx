@@ -44,7 +44,7 @@ const BRAND_META: Record<string, { logoSrc: string; name: string; short: string;
     accent:  "#1a1a1a",
   },
   watpak: {
-    logoSrc: "/logos/logo-watpak.png",
+    logoSrc: "https://res.cloudinary.com/ddwet1dzj/image/upload/v1777186978/watpack/Yellow_yz973x.png",
     name:    "WatPak",
     short:   "WP",
     accent:  "#b45309",
