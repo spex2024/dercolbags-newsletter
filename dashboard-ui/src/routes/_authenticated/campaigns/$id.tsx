@@ -3,9 +3,9 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { requirePageAccess } from "@/lib/permissions"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { campaignsApi } from "@/services/api/campaigns"
+import { EmailBuilder, type EmailBuilderRef } from "@/components/EmailBuilder"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import {
   ArrowLeft,
@@ -81,7 +81,9 @@ function CampaignDetailPage() {
   const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null)
   const [showTestInput, setShowTestInput] = useState(false)
   const [testEmail, setTestEmail] = useState("")
+  const [editorReady, setEditorReady] = useState(false)
   const testInputRef = useRef<HTMLInputElement>(null)
+  const emailBuilderRef = useRef<EmailBuilderRef>(null)
 
   const { data, isLoading } = useQuery({
     queryKey: ["campaign", id],
@@ -162,11 +164,13 @@ function CampaignDetailPage() {
       subject: string
       preheader?: string
       content: string
+      designJson?: Record<string, unknown>
     }) => campaignsApi.update(id, values),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["campaign", id] })
       toast.success("Campaign updated")
       setIsEditing(false)
+      setEditorReady(false)
     },
     onError: (err: Error) => {
       toast.error(err.message || "Failed to update campaign")
@@ -206,16 +210,23 @@ function CampaignDetailPage() {
       preheader: campaign.preheader || "",
       content: campaign.content,
     })
+    setEditorReady(false)
     setIsEditing(true)
   }
 
-  const saveEdit = () => {
+  const saveEdit = async () => {
     if (!editData) return
+    if (!emailBuilderRef.current) {
+      toast.error("Editor not ready")
+      return
+    }
+    const { html, design } = await emailBuilderRef.current.exportHtml()
     updateMutation.mutate({
       name: editData.name,
       subject: editData.subject,
       preheader: editData.preheader || undefined,
-      content: editData.content,
+      content: html,
+      designJson: design as Record<string, unknown>,
     })
   }
 
@@ -290,7 +301,7 @@ function CampaignDetailPage() {
           </button>
           <Button
             onClick={saveEdit}
-            disabled={updateMutation.isPending}
+            disabled={updateMutation.isPending || !editorReady}
             className="shadow-md hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
           >
             {updateMutation.isPending ? (
@@ -303,6 +314,7 @@ function CampaignDetailPage() {
         </div>
 
         <div className="border-2 border-foreground shadow-[6px_6px_0px_0px_oklch(0.1_0_0)] divide-y-2 divide-foreground">
+          {/* Name + meta fields */}
           <div className="bg-foreground text-background px-8 py-7">
             <p className="text-[10px] uppercase tracking-[0.2em] text-background/40 mb-3">Editing campaign</p>
             <Input
@@ -313,14 +325,13 @@ function CampaignDetailPage() {
             />
           </div>
 
-          <div className="p-8 space-y-6">
+          <div className="px-8 py-6 grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Email Subject</Label>
               <Input
                 value={editData.subject}
                 onChange={(e) => setEditData((d) => (d ? { ...d, subject: e.target.value } : null))}
                 placeholder="Email subject"
-                className="shadow-sm"
               />
             </div>
             <div className="space-y-2">
@@ -328,19 +339,34 @@ function CampaignDetailPage() {
               <Input
                 value={editData.preheader}
                 onChange={(e) => setEditData((d) => (d ? { ...d, preheader: e.target.value } : null))}
-                placeholder="Preview text shown after the subject line"
-                className="shadow-sm"
+                placeholder="Preview text after the subject line"
               />
             </div>
-            <div className="space-y-2">
-              <Label className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Email Content</Label>
-              <Textarea
-                value={editData.content}
-                onChange={(e) => setEditData((d) => (d ? { ...d, content: e.target.value } : null))}
-                className="min-h-[240px] text-sm shadow-sm font-mono"
-                placeholder="Write your email content…"
-              />
+          </div>
+
+          {/* Visual email builder */}
+          <div>
+            <div className="border-b-2 border-foreground bg-foreground px-6 py-3 flex items-center justify-between">
+              <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-background">
+                Email Content
+              </p>
+              {!editorReady && (
+                <div className="flex items-center gap-2 text-background/60">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  <span className="text-[11px]">Loading editor…</span>
+                </div>
+              )}
             </div>
+            <EmailBuilder
+              ref={emailBuilderRef}
+              designJson={
+                campaign.designJson && Object.keys(campaign.designJson).length > 0
+                  ? (campaign.designJson as Record<string, unknown>)
+                  : undefined
+              }
+              minHeight="700px"
+              onReady={() => setEditorReady(true)}
+            />
           </div>
         </div>
       </div>

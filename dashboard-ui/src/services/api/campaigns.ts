@@ -7,6 +7,7 @@ export interface Campaign {
   brand: Brand
   subject: string
   content: string
+  designJson?: Record<string, unknown> | null
   preheader?: string
   targetType: "all" | "list" | "segment"
   targetId?: string
@@ -34,6 +35,7 @@ export interface CreateCampaignInput {
   brand: Brand
   subject: string
   content: string
+  designJson?: Record<string, unknown>
   preheader?: string
   targetType: "all" | "list" | "segment"
   targetId?: string
@@ -43,6 +45,7 @@ export interface UpdateCampaignInput {
   name?: string
   subject?: string
   content?: string
+  designJson?: Record<string, unknown>
   preheader?: string
 }
 

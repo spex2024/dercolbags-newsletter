@@ -140,11 +140,12 @@ function NewCampaignPage() {
   const createMutation = useMutation({
     mutationFn: async (details: DetailsForm) => {
       if (!emailBuilderRef.current) throw new Error("Editor not ready")
-      const { html } = await emailBuilderRef.current.exportHtml()
+      const { html, design } = await emailBuilderRef.current.exportHtml()
       const result = await campaignsApi.create({
         ...details,
         brand: currentBrand,
         content: html,
+        designJson: design as Record<string, unknown>,
       })
       if (isScheduling && scheduledDate) {
         await campaignsApi.schedule(result.data.id, new Date(scheduledDate).toISOString())

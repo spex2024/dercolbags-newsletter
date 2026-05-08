@@ -154,6 +154,7 @@ export const campaigns = pgTable("campaigns", {
   brand: brandEnum("brand").notNull(),
   subject: text("subject").notNull(),
   content: text("content").notNull(),
+  designJson: json("design_json"),
   preheader: text("preheader"),
   status: campaignStatusEnum("status").notNull().default("draft"),
   scheduledAt: timestamp("scheduled_at"),

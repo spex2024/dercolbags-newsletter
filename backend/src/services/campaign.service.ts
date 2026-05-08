@@ -40,6 +40,7 @@ export async function createCampaign(input: CreateCampaignInput, userId: string)
       brand: input.brand,
       subject: input.subject.trim(),
       content: input.content,
+      designJson: input.designJson ?? null,
       preheader: input.preheader?.trim() ?? null,
       targetType: input.targetType,
       targetId: input.targetId ?? null,
@@ -108,6 +109,7 @@ export async function updateCampaign(id: string, input: UpdateCampaignInput, all
       ...(input.name && { name: input.name.trim() }),
       ...(input.subject && { subject: input.subject.trim() }),
       ...(input.content && { content: input.content }),
+      ...(input.designJson !== undefined && { designJson: input.designJson }),
       ...(input.preheader !== undefined && { preheader: input.preheader?.trim() ?? null }),
     })
     .where(eq(campaigns.id, id))

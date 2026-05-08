@@ -5,6 +5,7 @@ export const createCampaignSchema = z.object({
   brand: z.enum(["watpak", "dercolbags"]),
   subject: z.string().trim().min(1, "Subject is required").max(200),
   content: z.string().trim().min(1, "Content is required"),
+  designJson: z.record(z.unknown()).optional(),
   preheader: z.string().trim().max(200).optional(),
   targetType: z.enum(["all", "list", "segment"]),
   targetId: z.string().uuid().optional(),
@@ -14,6 +15,7 @@ export const updateCampaignSchema = z.object({
   name: z.string().trim().min(1).max(100).optional(),
   subject: z.string().trim().min(1).max(200).optional(),
   content: z.string().trim().min(1).optional(),
+  designJson: z.record(z.unknown()).optional(),
   preheader: z.string().trim().max(200).optional(),
 });
 
