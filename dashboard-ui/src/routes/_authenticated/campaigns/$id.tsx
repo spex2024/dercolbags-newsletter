@@ -6,7 +6,7 @@ import { campaignsApi } from "@/services/api/campaigns"
 import { emailTemplatesApi } from "@/services/api/email-templates"
 import { useBrand } from "@/contexts/BrandContext"
 import { EmailBuilder, type EmailBuilderRef } from "@/components/EmailBuilder"
-import { presetTemplates } from "@/lib/template-presets"
+import { presetTemplates, CATEGORY_LABEL } from "@/lib/template-presets"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -420,12 +420,16 @@ function CampaignDetailPage() {
 
         {/* Template picker dialog */}
         <Dialog open={showTemplatePicker} onOpenChange={setShowTemplatePicker}>
-          <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="text-lg font-black">Change Template</DialogTitle>
+          <DialogContent className="max-w-3xl h-[88vh] flex flex-col gap-0 p-0 overflow-hidden">
+            {/* Pinned header */}
+            <DialogHeader className="shrink-0 bg-foreground text-background px-6 py-5">
+              <DialogTitle className="text-base font-black text-background tracking-tight">Change Template</DialogTitle>
+              <p className="text-[11px] text-background/50 mt-0.5">Select a preset or one of your saved templates</p>
             </DialogHeader>
 
-            <div className="space-y-6 py-2">
+            {/* Scrollable body */}
+            <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
+
               {/* Saved campaign templates */}
               {(savedTemplatesData?.data?.items?.length ?? 0) > 0 && (
                 <div>
@@ -469,28 +473,32 @@ function CampaignDetailPage() {
                 <div className="grid gap-3 sm:grid-cols-3">
                   {presetTemplates.filter((p) => p.id !== "blank").map((preset) => {
                     const isSelected = pickerSelected?.label === preset.name
+                    const catBg: Record<string, string> = {
+                      welcome:"bg-emerald-800",newsletter:"bg-blue-900",promotion:"bg-red-900",
+                      notification:"bg-zinc-800",minimal:"bg-zinc-600",reengagement:"bg-violet-900",
+                      event:"bg-amber-800",ecommerce:"bg-orange-800",loyalty:"bg-yellow-700",
+                      feedback:"bg-cyan-800",announcement:"bg-rose-900",
+                    }
                     return (
                       <button
                         key={preset.id}
                         onClick={() => setPickerSelected({ label: preset.name, design: preset.design })}
                         className={`border-2 text-left transition-all hover:-translate-y-[2px] hover:shadow-md ${isSelected ? "border-foreground shadow-[4px_4px_0px_0px_oklch(0.1_0_0)]" : "border-foreground/30 hover:border-foreground"}`}
                       >
-                        <div className={`relative flex h-24 flex-col items-center justify-center border-b-2 border-inherit gap-1 ${{
-                          welcome:"bg-emerald-800",newsletter:"bg-blue-900",promotion:"bg-red-900",
-                          notification:"bg-zinc-800",minimal:"bg-zinc-600",reengagement:"bg-violet-900",
-                          event:"bg-amber-800",ecommerce:"bg-orange-800",loyalty:"bg-yellow-700",feedback:"bg-cyan-800"
-                        }[preset.category] ?? "bg-zinc-700"}`}>
+                        <div className={`relative flex h-24 flex-col items-center justify-center border-b-2 border-inherit gap-1 ${catBg[preset.category] ?? "bg-zinc-700"}`}>
                           <span className="text-3xl font-black text-white/20 select-none">{preset.thumbnail}</span>
-                          <span className="text-[9px] uppercase tracking-widest font-bold text-white/50">{preset.category}</span>
+                          <span className="text-[9px] uppercase tracking-widest font-bold text-white/60 bg-black/20 px-2 py-0.5">
+                            {CATEGORY_LABEL[preset.category] ?? preset.category}
+                          </span>
                           {isSelected && (
-                            <div className="absolute top-1.5 right-1.5 flex h-5 w-5 items-center justify-center bg-foreground text-background">
+                            <div className="absolute top-1.5 right-1.5 flex h-5 w-5 items-center justify-center bg-white text-black">
                               <Check className="h-3 w-3" />
                             </div>
                           )}
                         </div>
                         <div className="p-3">
-                          <p className="text-sm font-black">{preset.name}</p>
-                          <p className="text-[11px] text-muted-foreground truncate">{preset.description}</p>
+                          <p className="text-sm font-black leading-snug">{preset.name}</p>
+                          <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2">{preset.description}</p>
                         </div>
                       </button>
                     )
@@ -518,19 +526,23 @@ function CampaignDetailPage() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between border-t-2 pt-4">
+            {/* Pinned footer */}
+            <div className="shrink-0 flex items-center justify-between border-t-2 border-foreground px-6 py-4 bg-muted/20">
               <p className="text-xs text-muted-foreground">
-                {pickerSelected ? <>Selected: <span className="font-bold text-foreground">{pickerSelected.label}</span></> : "No template selected"}
+                {pickerSelected
+                  ? <><span className="font-bold text-foreground">{pickerSelected.label}</span> selected</>
+                  : "No template selected"}
               </p>
               <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setShowTemplatePicker(false)}>Cancel</Button>
+                <Button variant="outline" size="sm" onClick={() => setShowTemplatePicker(false)}>Cancel</Button>
                 <Button
+                  size="sm"
                   disabled={!pickerSelected}
                   onClick={() => {
                     if (!pickerSelected) return
                     emailBuilderRef.current?.loadDesign(pickerSelected.design)
                     setShowTemplatePicker(false)
-                    toast.success(`Template "${pickerSelected.label}" loaded`)
+                    toast.success(`"${pickerSelected.label}" loaded`)
                   }}
                   className="shadow-md hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
                 >

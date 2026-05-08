@@ -2,9 +2,23 @@ export interface PresetTemplate {
   id: string
   name: string
   description: string
-  category: "welcome" | "newsletter" | "promotion" | "notification" | "minimal" | "reengagement" | "event" | "ecommerce" | "loyalty" | "feedback"
+  category: "welcome" | "newsletter" | "promotion" | "notification" | "minimal" | "reengagement" | "event" | "ecommerce" | "loyalty" | "feedback" | "announcement"
   thumbnail: string
   design: Record<string, unknown>
+}
+
+export const CATEGORY_LABEL: Record<string, string> = {
+  welcome:      "Welcome",
+  newsletter:   "Newsletter",
+  promotion:    "Promotion",
+  notification: "Notification",
+  minimal:      "Minimal",
+  reengagement: "Re-Engage",
+  event:        "Event",
+  ecommerce:    "E-Commerce",
+  loyalty:      "Loyalty",
+  feedback:     "Feedback",
+  announcement: "Announcement",
 }
 
 // ── Shared building blocks ───────────────────────────────────────────────────
@@ -842,6 +856,162 @@ export const presetTemplates: PresetTemplate[] = [
           row("r-wd-footer", [col("c-wd-footer", [footer("t-wd-footer")], "#f4f4f5")], "0px"),
         ],
         values: bodyValues("#f4f4f5", "Your 3 highlights for this week."),
+      },
+      schemaVersion: 16,
+    },
+  },
+
+
+  // ── 18. Important Announcement ────────────────────────────────────────────
+  {
+    id: "announcement",
+    name: "Important Announcement",
+    description: "Bold, urgent announcement — policy changes, service updates, breaking news",
+    category: "announcement",
+    thumbnail: "18",
+    design: {
+      counters: { u_row: 4, u_column: 4, u_content_text: 4, u_content_button: 1, u_content_divider: 1 },
+      body: {
+        rows: [
+          row("r-an-header", [{
+            id: "c-an-header",
+            contents: [
+              textBlock("t-an-brand",
+                `<p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:4px;color:rgba(255,255,255,0.5);text-align:center;margin:0 0 6px;">{{brandName}}</p>
+                 <p style="font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:3px;color:#ffffff;background:rgba(255,255,255,0.15);display:inline-block;padding:4px 14px;text-align:center;margin:0;">Important Announcement</p>`,
+                "28px 40px 28px"),
+            ],
+            values: { backgroundColor: "#b91c1c", padding: "0px", _meta: { htmlID: "c-an-header", htmlClassNames: "u_column" } },
+          }], "0px"),
+          row("r-an-body", [col("c-an-body", [
+            textBlock("t-an-title",
+              `<p style="font-size:30px;font-weight:900;color:#000000;text-transform:uppercase;letter-spacing:-0.5px;text-align:center;line-height:115%;margin:0;">Announcement<br/>Headline Here</p>`,
+              "40px 40px 16px"),
+            textBlock("t-an-body",
+              `<p style="font-size:16px;color:#444444;text-align:center;line-height:175%;">We have an important update to share with you. Please read this message carefully as it may affect your account, orders, or how you use our service.</p>
+               <p style="font-size:16px;color:#444444;text-align:center;line-height:175%;">&nbsp;</p>
+               <p style="font-size:16px;color:#444444;text-align:center;line-height:175%;">Add your detailed message here. Be clear, direct, and tell your subscribers exactly what they need to know and what action, if any, they should take.</p>`,
+              "0px 40px 28px"),
+            btn("b-an-cta", "Learn More →", "{{ctaUrl}}", "#b91c1c", "#ffffff", "0px 40px 40px"),
+          ])], "#ffffff"),
+          row("r-an-div", [col("c-an-div", [divider("d-an", "#e5e5e5", "0px 40px")])], "0px"),
+          row("r-an-footer", [col("c-an-footer", [footer("t-an-footer")], "#f4f4f5")], "0px"),
+        ],
+        values: bodyValues("#f4f4f5", "An important update from {{brandName}}."),
+      },
+      schemaVersion: 16,
+    },
+  },
+
+  // ── 19. Birthday / Anniversary ────────────────────────────────────────────
+  {
+    id: "birthday-anniversary",
+    name: "Birthday / Anniversary",
+    description: "Personalised celebration email with a special gift or discount",
+    category: "loyalty",
+    thumbnail: "19",
+    design: {
+      counters: { u_row: 5, u_column: 5, u_content_text: 5, u_content_button: 1, u_content_divider: 2 },
+      body: {
+        rows: [
+          row("r-ba-header", [brandHeader("ba-hdr")], "0px"),
+          row("r-ba-hero", [col("c-ba-hero", [
+            textBlock("t-ba-emoji",
+              `<p style="font-size:52px;text-align:center;margin:0;">🎂</p>`,
+              "36px 40px 12px"),
+            textBlock("t-ba-title",
+              `<p style="font-size:34px;font-weight:900;color:#000000;text-transform:uppercase;letter-spacing:-1px;text-align:center;line-height:110%;margin:0;">Happy Birthday,<br/>{{name}}!</p>`,
+              "0px 40px 16px"),
+            textBlock("t-ba-body",
+              `<p style="font-size:16px;color:#555555;text-align:center;line-height:170%;">On your special day, we want to celebrate you. As our way of saying thank you for being part of the {{brandName}} family, here's a little gift from us to you.</p>`,
+              "0px 40px 24px"),
+            divider("d-ba-1", "#e5e5e5", "0px 40px"),
+          ])], "#ffffff"),
+          row("r-ba-gift", [col("c-ba-gift", [
+            textBlock("t-ba-code",
+              `<p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:3px;color:#999999;text-align:center;margin:0 0 12px;">Your Birthday Gift</p>
+               <p style="font-size:36px;font-weight:900;color:#000000;font-family:monospace;text-align:center;letter-spacing:6px;background:linear-gradient(135deg,#fff7ed,#fef3c7);border:2px dashed #f59e0b;padding:20px;margin:0;">BDAY25</p>
+               <p style="font-size:13px;color:#888888;text-align:center;margin:12px 0 0;">25% off your next order · Valid for 7 days</p>`,
+              "24px 40px 24px"),
+            divider("d-ba-2", "#e5e5e5", "0px 40px"),
+            btn("b-ba-cta", "Claim My Gift →", "{{ctaUrl}}", "#000000", "#ffffff", "20px 40px 40px"),
+          ])], "#ffffff"),
+          row("r-ba-div", [col("c-ba-div", [divider("d-ba-3", "#e5e5e5", "0px 40px")])], "0px"),
+          row("r-ba-footer", [col("c-ba-footer", [footer("t-ba-footer")], "#f4f4f5")], "0px"),
+        ],
+        values: bodyValues("#f4f4f5", "We're celebrating you today, {{name}} 🎂"),
+      },
+      schemaVersion: 16,
+    },
+  },
+
+  // ── 20. Content Roundup / Curated Links ────────────────────────────────────
+  {
+    id: "content-roundup",
+    name: "Content Roundup",
+    description: "Curated list of articles, links, or resources with short descriptions",
+    category: "newsletter",
+    thumbnail: "20",
+    design: {
+      counters: { u_row: 7, u_column: 7, u_content_text: 8, u_content_button: 1, u_content_divider: 5 },
+      body: {
+        rows: [
+          row("r-cr-header", [brandHeader("cr-hdr", "Curated for You")], "0px"),
+          row("r-cr-intro", [col("c-cr-intro", [
+            textBlock("t-cr-intro",
+              `<p style="font-size:22px;font-weight:900;color:#000000;text-transform:uppercase;letter-spacing:-0.5px;text-align:center;margin:0;">This Week's Reading List</p>
+               <p style="font-size:14px;color:#777777;text-align:center;margin:8px 0 0;">Handpicked content worth your time</p>`,
+              "32px 40px 20px"),
+            divider("d-cr-0", "#000000", "0px 40px"),
+          ])], "#ffffff"),
+          row("r-cr-item1", [col("c-cr-item1", [
+            textBlock("t-cr-item1",
+              `<table width="100%">
+                 <tr>
+                   <td style="padding:20px 40px 16px;">
+                     <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:3px;color:#999999;margin:0 0 8px;">Article · 5 min read</p>
+                     <p style="font-size:17px;font-weight:900;color:#000000;margin:0 0 8px;"><a href="{{ctaUrl}}" style="color:#000000;text-decoration:none;">Title of Your First Article or Resource</a></p>
+                     <p style="font-size:14px;color:#555555;line-height:165%;margin:0;">A short one-sentence teaser that gives enough context to make someone want to click through and read more.</p>
+                   </td>
+                 </tr>
+               </table>`,
+              "0px 0px"),
+            divider("d-cr-1", "#e5e5e5", "0px 40px"),
+          ])], "#ffffff"),
+          row("r-cr-item2", [col("c-cr-item2", [
+            textBlock("t-cr-item2",
+              `<table width="100%">
+                 <tr>
+                   <td style="padding:20px 40px 16px;">
+                     <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:3px;color:#999999;margin:0 0 8px;">Guide · 8 min read</p>
+                     <p style="font-size:17px;font-weight:900;color:#000000;margin:0 0 8px;"><a href="{{ctaUrl}}" style="color:#000000;text-decoration:none;">Title of Your Second Article or Resource</a></p>
+                     <p style="font-size:14px;color:#555555;line-height:165%;margin:0;">Another sentence of context. Keep each entry brief — this is a roundup, not a full article. Let the link do the heavy lifting.</p>
+                   </td>
+                 </tr>
+               </table>`,
+              "0px 0px"),
+            divider("d-cr-2", "#e5e5e5", "0px 40px"),
+          ])], "#ffffff"),
+          row("r-cr-item3", [col("c-cr-item3", [
+            textBlock("t-cr-item3",
+              `<table width="100%">
+                 <tr>
+                   <td style="padding:20px 40px 16px;">
+                     <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:3px;color:#999999;margin:0 0 8px;">News · 3 min read</p>
+                     <p style="font-size:17px;font-weight:900;color:#000000;margin:0 0 8px;"><a href="{{ctaUrl}}" style="color:#000000;text-decoration:none;">Title of Your Third Article or Resource</a></p>
+                     <p style="font-size:14px;color:#555555;line-height:165%;margin:0;">Third item in the roundup. You can add or remove these rows as needed — one per topic, link, or update.</p>
+                   </td>
+                 </tr>
+               </table>`,
+              "0px 0px"),
+            divider("d-cr-3", "#e5e5e5", "0px 40px"),
+          ])], "#ffffff"),
+          row("r-cr-cta", [col("c-cr-cta", [
+            btn("b-cr-cta", "See All Content →", "{{ctaUrl}}", "#000000", "#ffffff", "16px 40px 36px"),
+          ])], "#ffffff"),
+          row("r-cr-footer", [col("c-cr-footer", [footer("t-cr-footer")], "#f4f4f5")], "0px"),
+        ],
+        values: bodyValues("#f4f4f5", "Your curated reading list for this week."),
       },
       schemaVersion: 16,
     },

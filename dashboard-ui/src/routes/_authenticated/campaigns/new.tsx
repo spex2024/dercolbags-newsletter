@@ -7,7 +7,7 @@ import { emailTemplatesApi } from "@/services/api/email-templates"
 import { mailingListsApi } from "@/services/api/mailing-lists"
 import { useBrand } from "@/contexts/BrandContext"
 import { EmailBuilder, type EmailBuilderRef } from "@/components/EmailBuilder"
-import { presetTemplates } from "@/lib/template-presets"
+import { presetTemplates, CATEGORY_LABEL } from "@/lib/template-presets"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -107,6 +107,7 @@ const CATEGORY_BG: Record<string, string> = {
   ecommerce:    "bg-orange-800",
   loyalty:      "bg-yellow-700",
   feedback:     "bg-cyan-800",
+  announcement: "bg-rose-900",
 }
 
 // ── Main component ──────────────────────────────────────────────────────────
@@ -339,7 +340,7 @@ function NewCampaignPage() {
             </p>
           </div>
 
-          <div className="p-6 space-y-8">
+          <div className="p-6 space-y-8 max-h-[62vh] overflow-y-auto">
 
             {/* Saved campaign templates */}
             {templatesLoading ? (
@@ -421,7 +422,7 @@ function NewCampaignPage() {
                           {preset.thumbnail}
                         </span>
                         <span className="text-[9px] uppercase tracking-[0.25em] font-bold text-white/60 bg-black/30 px-2 py-0.5">
-                          {preset.category}
+                          {CATEGORY_LABEL[preset.category] ?? preset.category}
                         </span>
                         {isSelected && (
                           <div className="absolute top-2 right-2 flex h-6 w-6 items-center justify-center bg-white text-black">
