@@ -21,6 +21,7 @@ export const listSubscribersSchema = z.object({
     .string()
     .transform((v) => v === "true")
     .optional(),
+  unsubscribeReason: z.enum(["manual", "bounce", "complaint", "admin"]).optional(),
   page: z
     .string()
     .default("1")

@@ -85,7 +85,7 @@ export async function listSubscribers(
   query: ListSubscribersQuery,
   allowedBrands: AllowedBrands
 ) {
-  const { brand, search, status, isSubscribed, page, limit, sortBy, sortOrder } = query;
+  const { brand, search, status, isSubscribed, unsubscribeReason, page, limit, sortBy, sortOrder } = query;
 
   // Brand access check
   if (brand && allowedBrands !== null && !allowedBrands.includes(brand as Brand)) {
@@ -105,6 +105,7 @@ export async function listSubscribers(
 
   if (status) conditions.push(eq(subscribers.status, status));
   if (isSubscribed !== undefined) conditions.push(eq(subscribers.isSubscribed, isSubscribed));
+  if (unsubscribeReason) conditions.push(eq(subscribers.unsubscribeReason, unsubscribeReason));
   if (search) {
     conditions.push(
       or(ilike(subscribers.email, `%${search}%`), ilike(subscribers.name, `%${search}%`))!

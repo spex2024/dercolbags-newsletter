@@ -41,6 +41,7 @@ export interface ListSubscribersParams {
   search?: string
   status?: SubscriberStatus
   isSubscribed?: boolean
+  unsubscribeReason?: "manual" | "bounce" | "complaint" | "admin"
   page?: number
   limit?: number
   sortBy?: "createdAt" | "email" | "name" | "status" | "brand"

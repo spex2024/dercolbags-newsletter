@@ -13,7 +13,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Plus, Search, Users } from "lucide-react"
+import { Plus, Search, Users, UserMinus, AlertTriangle, Inbox } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { format } from "date-fns"
 import type { SubscriberStatus } from "@/services/api/types"
@@ -23,6 +23,10 @@ export const Route = createFileRoute("/_authenticated/subscribers/")({
   component: SubscribersPage,
 })
 
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+type SubscriptionTab = "active" | "unsubscribed" | "bounced" | "all"
+
 const STATUS_BADGE: Record<SubscriberStatus, string> = {
   new:       "border-foreground/20 bg-foreground/5 text-foreground",
   contacted: "border-foreground bg-foreground text-background",
@@ -30,27 +34,69 @@ const STATUS_BADGE: Record<SubscriberStatus, string> = {
   spam:      "border-destructive/40 bg-destructive/5 text-destructive",
 }
 
+const TABS: { key: SubscriptionTab; label: string; icon: React.ElementType }[] = [
+  { key: "active",       label: "Active",       icon: Users },
+  { key: "unsubscribed", label: "Unsubscribed",  icon: UserMinus },
+  { key: "bounced",      label: "Bounced",       icon: AlertTriangle },
+  { key: "all",          label: "All",           icon: Inbox },
+]
+
+function tabToParams(tab: SubscriptionTab) {
+  if (tab === "active")       return { isSubscribed: true,  unsubscribeReason: undefined }
+  if (tab === "unsubscribed") return { isSubscribed: false, unsubscribeReason: "manual" as const }
+  if (tab === "bounced")      return { isSubscribed: false, unsubscribeReason: "bounce" as const }
+  return                             { isSubscribed: undefined, unsubscribeReason: undefined }
+}
+
+// ── Page ──────────────────────────────────────────────────────────────────────
+
 function SubscribersPage() {
   const navigate = useNavigate()
   const { currentBrand } = useBrand()
-  const [status, setStatus] = useState<SubscriberStatus | "all">("all")
+  const [tab,         setTab]         = useState<SubscriptionTab>("active")
+  const [status,      setStatus]      = useState<SubscriberStatus | "all">("all")
   const [searchQuery, setSearchQuery] = useState("")
-  const [page, setPage] = useState(1)
+  const [page,        setPage]        = useState(1)
+
+  const { isSubscribed, unsubscribeReason } = tabToParams(tab)
 
   const { data, isLoading } = useQuery({
-    queryKey: ["subscribers", currentBrand, status, searchQuery, page],
+    queryKey: ["subscribers", currentBrand, tab, status, searchQuery, page],
     queryFn: () =>
       subscribersApi.list({
-        brand:  currentBrand,
-        status: status === "all" ? undefined : status,
-        search: searchQuery || undefined,
+        brand:             currentBrand,
+        isSubscribed,
+        unsubscribeReason,
+        status:            status === "all" ? undefined : status,
+        search:            searchQuery || undefined,
         page,
-        limit:  20,
+        limit:             20,
       }),
   })
 
   const total    = data?.data?.pagination?.total ?? 0
   const totalPgs = data?.data?.pagination?.totalPages ?? 1
+
+  function handleTabChange(t: SubscriptionTab) {
+    setTab(t)
+    setPage(1)
+    setSearchQuery("")
+    setStatus("all")
+  }
+
+  const emptyLabel = {
+    active:       "No active subscribers",
+    unsubscribed: "No manually unsubscribed emails",
+    bounced:      "No bounced emails",
+    all:          "No subscribers found",
+  }[tab]
+
+  const emptyHint = {
+    active:       searchQuery || status !== "all" ? "Try adjusting your filters" : "Add your first subscriber to get started",
+    unsubscribed: "When subscribers click unsubscribe, they'll appear here",
+    bounced:      "Emails that bounced during a campaign send will appear here",
+    all:          searchQuery || status !== "all" ? "Try adjusting your filters" : "No subscribers yet",
+  }[tab]
 
   return (
     <div className="space-y-6">
@@ -61,7 +107,9 @@ function SubscribersPage() {
           <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground mb-1">Management</p>
           <h1 className="text-4xl font-black tracking-tight">Subscribers</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {isLoading ? "Loading…" : `${total.toLocaleString()} subscriber${total !== 1 ? "s" : ""}`}
+            {isLoading
+              ? "Loading…"
+              : `${total.toLocaleString()} ${tab === "all" ? "total" : tab} subscriber${total !== 1 ? "s" : ""}`}
           </p>
         </div>
         <Button
@@ -72,6 +120,45 @@ function SubscribersPage() {
           Add Subscriber
         </Button>
       </div>
+
+      {/* Subscription status tabs */}
+      <div className="flex border-b-2 border-foreground">
+        {TABS.map(({ key, label, icon: Icon }) => (
+          <button
+            key={key}
+            onClick={() => handleTabChange(key)}
+            className={`flex items-center gap-2 px-5 py-2.5 text-[11px] font-bold uppercase tracking-wider transition-colors
+              ${tab === key
+                ? "bg-foreground text-background"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
+              }`}
+          >
+            <Icon className="h-3.5 w-3.5" />
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {/* Bounced info banner */}
+      {tab === "bounced" && (
+        <div className="flex items-start gap-3 border border-amber-500/30 bg-amber-50/40 dark:bg-amber-900/10 px-4 py-3">
+          <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+          <p className="text-xs text-amber-800 dark:text-amber-400 leading-relaxed">
+            These addresses hard-bounced during a campaign send and were automatically unsubscribed.
+            They will be skipped on future sends and imports.
+          </p>
+        </div>
+      )}
+
+      {/* Unsubscribed info banner */}
+      {tab === "unsubscribed" && (
+        <div className="flex items-start gap-3 border border-foreground/10 bg-muted/30 px-4 py-3">
+          <UserMinus className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            These subscribers manually opted out. They are excluded from all campaign sends and imports.
+          </p>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex flex-col gap-3 sm:flex-row">
@@ -86,7 +173,7 @@ function SubscribersPage() {
         </div>
         <Select value={status} onValueChange={(v) => { setStatus(v as SubscriberStatus | "all"); setPage(1) }}>
           <SelectTrigger className="w-full sm:w-44">
-            <SelectValue placeholder="Status" />
+            <SelectValue placeholder="CRM Status" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Status</SelectItem>
@@ -103,7 +190,7 @@ function SubscribersPage() {
         <Table>
           <TableHeader>
             <TableRow className="bg-foreground hover:bg-foreground border-b-2 border-foreground">
-              {["Subscriber", "Status", "Source", "Location", "Added"].map((h, i) => (
+              {["Subscriber", "CRM Status", "Source", "Location", tab === "bounced" ? "Bounced" : tab === "unsubscribed" ? "Unsubscribed" : "Added"].map((h, i) => (
                 <TableHead
                   key={h}
                   className={`text-background text-[10px] uppercase tracking-[0.15em] font-bold py-3 h-auto
@@ -141,13 +228,11 @@ function SubscribersPage() {
               <TableRow>
                 <TableCell colSpan={5} className="py-20 text-center">
                   <div className="flex flex-col items-center gap-3">
-                    <Users className="h-8 w-8 text-muted-foreground/40" />
-                    <p className="text-sm font-semibold">No subscribers found</p>
-                    <p className="text-xs text-muted-foreground">
-                      {searchQuery || status !== "all"
-                        ? "Try adjusting your filters"
-                        : "Add your first subscriber to get started"}
-                    </p>
+                    {tab === "bounced"
+                      ? <AlertTriangle className="h-8 w-8 text-muted-foreground/40" />
+                      : <Users className="h-8 w-8 text-muted-foreground/40" />}
+                    <p className="text-sm font-semibold">{emptyLabel}</p>
+                    <p className="text-xs text-muted-foreground">{emptyHint}</p>
                   </div>
                 </TableCell>
               </TableRow>
@@ -183,10 +268,27 @@ function SubscribersPage() {
                     {sub.location || "—"}
                   </TableCell>
                   <TableCell className="hidden sm:table-cell">
-                    <p className="text-sm tabular-nums">{format(new Date(sub.createdAt), "MMM d, yyyy")}</p>
-                    <p className={`text-[10px] uppercase tracking-widest font-bold mt-0.5 ${sub.isSubscribed ? "text-foreground/50" : "text-destructive"}`}>
-                      {sub.isSubscribed ? "Active" : "Unsubscribed"}
-                    </p>
+                    {tab === "bounced" || tab === "unsubscribed" ? (
+                      <div>
+                        <p className="text-sm tabular-nums">
+                          {sub.unsubscribedAt
+                            ? format(new Date(sub.unsubscribedAt), "MMM d, yyyy")
+                            : "—"}
+                        </p>
+                        <p className={`text-[10px] uppercase tracking-widest font-bold mt-0.5 ${
+                          tab === "bounced" ? "text-amber-600" : "text-muted-foreground"
+                        }`}>
+                          {tab === "bounced" ? "Bounced" : "Unsubscribed"}
+                        </p>
+                      </div>
+                    ) : (
+                      <div>
+                        <p className="text-sm tabular-nums">{format(new Date(sub.createdAt), "MMM d, yyyy")}</p>
+                        <p className="text-[10px] uppercase tracking-widest font-bold mt-0.5 text-foreground/50">
+                          Active
+                        </p>
+                      </div>
+                    )}
                   </TableCell>
                 </TableRow>
               ))
