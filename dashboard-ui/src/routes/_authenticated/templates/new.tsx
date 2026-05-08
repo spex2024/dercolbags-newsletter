@@ -181,6 +181,14 @@ function NewTemplatePage() {
 
   const openConfigModal = (preset: PresetTemplate, e?: React.MouseEvent) => {
     e?.stopPropagation()
+    // reset form only when switching to a different template
+    if (preset.id !== selectedPreset?.id) {
+      setName("")
+      setTemplateKey("")
+      setSubject("")
+      setCategory("campaign")
+      setKeyDropdownOpen(false)
+    }
     setSelectedPreset(preset)
     setConfigPreset(preset)
   }
