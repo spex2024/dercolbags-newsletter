@@ -38,10 +38,10 @@ export const Route = createFileRoute("/_authenticated/lists/$id")({
 })
 
 const STATUS_STYLE: Record<string, string> = {
-  new: "bg-secondary text-secondary-foreground",
-  contacted: "bg-foreground text-background",
-  converted: "bg-foreground text-background",
-  spam: "bg-destructive/10 text-destructive",
+  new:       "border-foreground/20 bg-foreground/5 text-foreground",
+  contacted: "border-foreground bg-foreground text-background",
+  converted: "border-emerald-600 bg-emerald-50 text-emerald-700",
+  spam:      "border-destructive/40 bg-destructive/5 text-destructive",
 }
 
 function ListDetailPage() {
@@ -275,17 +275,17 @@ function ListDetailPage() {
 
         <Table>
           <TableHeader>
-            <TableRow className="bg-muted/30 hover:bg-muted/30 border-b">
-              <TableHead className="text-[10px] uppercase tracking-[0.15em] font-bold py-3 h-auto text-foreground/70">
+            <TableRow className="bg-foreground hover:bg-foreground border-b-2 border-foreground">
+              <TableHead className="text-background text-[10px] uppercase tracking-[0.15em] font-bold py-3 h-auto">
                 Subscriber
               </TableHead>
-              <TableHead className="text-[10px] uppercase tracking-[0.15em] font-bold py-3 h-auto text-foreground/70">
+              <TableHead className="text-background text-[10px] uppercase tracking-[0.15em] font-bold py-3 h-auto">
                 Status
               </TableHead>
-              <TableHead className="hidden sm:table-cell text-[10px] uppercase tracking-[0.15em] font-bold py-3 h-auto text-foreground/70">
+              <TableHead className="hidden sm:table-cell text-background text-[10px] uppercase tracking-[0.15em] font-bold py-3 h-auto">
                 Source
               </TableHead>
-              <TableHead className="text-right text-[10px] uppercase tracking-[0.15em] font-bold py-3 h-auto text-foreground/70">
+              <TableHead className="text-right text-background text-[10px] uppercase tracking-[0.15em] font-bold py-3 h-auto">
                 Remove
               </TableHead>
             </TableRow>
@@ -327,7 +327,7 @@ function ListDetailPage() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 ${STATUS_STYLE[sub.status] ?? "bg-secondary text-secondary-foreground"}`}>
+                    <span className={`text-[10px] uppercase tracking-widest font-bold px-2 py-0.5 border ${STATUS_STYLE[sub.status] ?? "border-foreground/20 bg-foreground/5 text-foreground"}`}>
                       {sub.status}
                     </span>
                   </TableCell>

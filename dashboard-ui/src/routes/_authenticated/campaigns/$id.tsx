@@ -59,11 +59,11 @@ const CONFIRM_META: Record<
 }
 
 const STATUS_STYLES: Record<string, string> = {
-  draft: "bg-secondary text-secondary-foreground",
-  scheduled: "bg-foreground text-background",
-  sending: "bg-foreground text-background",
-  sent: "bg-foreground text-background",
-  cancelled: "bg-destructive text-white",
+  draft:     "border-foreground/20 bg-foreground/5 text-foreground",
+  scheduled: "border-foreground/40 text-foreground",
+  sending:   "border-foreground bg-foreground text-background",
+  sent:      "border-foreground bg-foreground text-background",
+  cancelled: "border-destructive/40 bg-destructive/5 text-destructive",
 }
 
 function CampaignDetailPage() {
@@ -170,7 +170,7 @@ function CampaignDetailPage() {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        <p className="text-xs uppercase tracking-widest text-muted-foreground">Loading</p>
+        <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Loading</p>
       </div>
     )
   }
@@ -178,9 +178,9 @@ function CampaignDetailPage() {
   const campaign = data?.data
   if (!campaign) {
     return (
-      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-2 border">
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-2 border-2 border-foreground">
         <p className="text-4xl font-black">404</p>
-        <p className="text-xs uppercase tracking-widest text-muted-foreground">Campaign not found</p>
+        <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Campaign not found</p>
         <Button variant="outline" className="mt-4" onClick={() => navigate({ to: "/campaigns" })}>
           Back to Campaigns
         </Button>
@@ -229,15 +229,15 @@ function CampaignDetailPage() {
           Back
         </button>
 
-        <div className="border shadow-xl">
+        <div className="border-2 border-foreground shadow-[6px_6px_0px_0px_oklch(0.1_0_0)] divide-y-2 divide-foreground">
           {/* header */}
-          <div className={`border-b p-8 ${meta.danger ? "bg-destructive" : "bg-foreground"}`}>
-            <p className="text-xs uppercase tracking-widest text-white/60 mb-2">Confirm action</p>
+          <div className={`px-8 py-7 ${meta.danger ? "bg-destructive" : "bg-foreground"}`}>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-white/50 mb-2">Confirm action</p>
             <h2 className="text-2xl font-black text-white">{meta.title}</h2>
           </div>
 
-          <div className="p-8">
-            <p className="text-muted-foreground">{meta.desc}</p>
+          <div className="px-8 py-8">
+            <p className="text-sm text-muted-foreground">{meta.desc}</p>
 
             <div className="mt-8 flex gap-3">
               <Button
@@ -295,9 +295,9 @@ function CampaignDetailPage() {
           </Button>
         </div>
 
-        <div className="border shadow-xl divide-y">
-          <div className="bg-foreground text-background p-8">
-            <p className="text-xs uppercase tracking-widest text-background/40 mb-3">Editing campaign</p>
+        <div className="border-2 border-foreground shadow-[6px_6px_0px_0px_oklch(0.1_0_0)] divide-y-2 divide-foreground">
+          <div className="bg-foreground text-background px-8 py-7">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-background/40 mb-3">Editing campaign</p>
             <Input
               value={editData.name}
               onChange={(e) => setEditData((d) => (d ? { ...d, name: e.target.value } : null))}
@@ -308,7 +308,7 @@ function CampaignDetailPage() {
 
           <div className="p-8 space-y-6">
             <div className="space-y-2">
-              <Label className="text-xs uppercase tracking-widest text-muted-foreground">Email Subject</Label>
+              <Label className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Email Subject</Label>
               <Input
                 value={editData.subject}
                 onChange={(e) => setEditData((d) => (d ? { ...d, subject: e.target.value } : null))}
@@ -317,7 +317,7 @@ function CampaignDetailPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-xs uppercase tracking-widest text-muted-foreground">Preheader (optional)</Label>
+              <Label className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Preheader (optional)</Label>
               <Input
                 value={editData.preheader}
                 onChange={(e) => setEditData((d) => (d ? { ...d, preheader: e.target.value } : null))}
@@ -326,7 +326,7 @@ function CampaignDetailPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-xs uppercase tracking-widest text-muted-foreground">Email Content</Label>
+              <Label className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Email Content</Label>
               <Textarea
                 value={editData.content}
                 onChange={(e) => setEditData((d) => (d ? { ...d, content: e.target.value } : null))}
@@ -428,13 +428,13 @@ function CampaignDetailPage() {
       </div>
 
       {/* Main block */}
-      <div className="border shadow-xl divide-y">
+      <div className="border-2 border-foreground shadow-[6px_6px_0px_0px_oklch(0.1_0_0)] divide-y-2 divide-foreground">
 
         {/* Hero header */}
         <div className="bg-foreground text-background px-8 pt-10 pb-8">
           <div className="flex items-start justify-between gap-6">
             <div className="flex-1 min-w-0">
-              <p className="text-xs uppercase tracking-[0.2em] text-background/40 mb-3">
+              <p className="text-[10px] uppercase tracking-[0.2em] text-background/40 mb-3">
                 Campaign
               </p>
               <h1 className="text-4xl font-black tracking-tight leading-tight break-words">
@@ -445,7 +445,7 @@ function CampaignDetailPage() {
               </p>
             </div>
             <span
-              className={`shrink-0 inline-block px-3 py-1 text-xs uppercase tracking-widest font-bold border border-background/20 ${STATUS_STYLES[campaign.status] ?? "bg-secondary text-secondary-foreground"}`}
+              className={`shrink-0 inline-block px-3 py-1 text-[10px] uppercase tracking-widest font-bold border ${STATUS_STYLES[campaign.status] ?? "border-foreground/20 bg-foreground/5 text-foreground"}`}
             >
               {campaign.status}
             </span>
@@ -463,11 +463,11 @@ function CampaignDetailPage() {
         )}
 
         {/* Meta strip */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 divide-x">
+        <div className="grid grid-cols-2 sm:grid-cols-3 divide-x-2 divide-foreground">
           <div className="px-6 py-5">
             <div className="flex items-center gap-2 mb-1">
               <Target className="h-3.5 w-3.5 text-muted-foreground" />
-              <p className="text-xs uppercase tracking-widest text-muted-foreground">Target</p>
+              <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Target</p>
             </div>
             <p className="text-base font-semibold capitalize">{campaign.targetType}</p>
           </div>
@@ -475,7 +475,7 @@ function CampaignDetailPage() {
           <div className="px-6 py-5">
             <div className="flex items-center gap-2 mb-1">
               <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-              <p className="text-xs uppercase tracking-widest text-muted-foreground">Created</p>
+              <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Created</p>
             </div>
             <p className="text-base font-semibold">
               {format(new Date(campaign.createdAt), "MMM d, yyyy")}
@@ -486,7 +486,7 @@ function CampaignDetailPage() {
             <div className="px-6 py-5">
               <div className="flex items-center gap-2 mb-1">
                 <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-                <p className="text-xs uppercase tracking-widest text-muted-foreground">Scheduled For</p>
+                <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Scheduled For</p>
               </div>
               <p className="text-base font-semibold">
                 {format(new Date(campaign.scheduledAt), "MMM d, yyyy · h:mm a")}
@@ -498,7 +498,7 @@ function CampaignDetailPage() {
             <div className="px-6 py-5">
               <div className="flex items-center gap-2 mb-1">
                 <Send className="h-3.5 w-3.5 text-muted-foreground" />
-                <p className="text-xs uppercase tracking-widest text-muted-foreground">Sent</p>
+                <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Sent</p>
               </div>
               <p className="text-base font-semibold">
                 {format(new Date(campaign.sentAt), "MMM d, yyyy")}
@@ -512,12 +512,12 @@ function CampaignDetailPage() {
           <>
             <div className="px-8 py-3 bg-muted/40 flex items-center gap-2">
               <Users className="h-3.5 w-3.5 text-muted-foreground" />
-              <p className="text-xs uppercase tracking-widest font-semibold text-muted-foreground">
+              <p className="text-[10px] uppercase tracking-[0.15em] font-bold text-muted-foreground">
                 Performance
               </p>
             </div>
             {/* raw counts */}
-            <div className="grid grid-cols-4 divide-x">
+            <div className="grid grid-cols-4 divide-x-2 divide-foreground">
               {[
                 { label: "Recipients", value: statsData.data.totalRecipients },
                 { label: "Delivered", value: statsData.data.sent },
@@ -535,9 +535,9 @@ function CampaignDetailPage() {
               ))}
             </div>
             {/* open & click rates */}
-            <div className="grid grid-cols-2 divide-x border-t">
+            <div className="grid grid-cols-2 divide-x-2 divide-foreground">
               <div className="px-8 py-8 flex items-center gap-6">
-                <div className="p-3 bg-muted rounded-full">
+                <div className="p-3 bg-foreground/5 border-2 border-foreground/10">
                   <MailOpen className="h-5 w-5 text-muted-foreground" />
                 </div>
                 <div>
@@ -550,7 +550,7 @@ function CampaignDetailPage() {
                 </div>
               </div>
               <div className="px-8 py-8 flex items-center gap-6">
-                <div className="p-3 bg-muted rounded-full">
+                <div className="p-3 bg-foreground/5 border-2 border-foreground/10">
                   <MousePointerClick className="h-5 w-5 text-muted-foreground" />
                 </div>
                 <div>
@@ -569,7 +569,7 @@ function CampaignDetailPage() {
         {/* Preheader */}
         {campaign.preheader && (
           <div className="px-8 py-6">
-            <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">
+            <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-bold mb-2">
               Preheader
             </p>
             <p className="text-sm text-foreground/80 leading-relaxed">

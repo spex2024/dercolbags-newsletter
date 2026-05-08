@@ -15,16 +15,16 @@ export const Route = createFileRoute("/_authenticated/templates/$id")({
 })
 
 const STATUS_STYLE: Record<string, string> = {
-  draft: "bg-secondary text-secondary-foreground",
-  active: "bg-foreground text-background",
-  archived: "border border-foreground/30 text-muted-foreground",
+  draft:    "border-foreground/20 bg-foreground/5 text-foreground",
+  active:   "border-foreground bg-foreground text-background",
+  archived: "border-foreground/20 text-muted-foreground",
 }
 
 const CATEGORY_STYLE: Record<string, string> = {
-  system: "bg-foreground/10 text-foreground",
-  auth: "bg-foreground/10 text-foreground",
-  campaign: "bg-foreground text-background",
-  notification: "bg-secondary text-secondary-foreground",
+  system:       "border-foreground/20 text-muted-foreground",
+  auth:         "border-foreground/20 text-muted-foreground",
+  campaign:     "border-foreground bg-foreground text-background",
+  notification: "border-foreground/30 text-foreground",
 }
 
 function TemplateDetailPage() {
@@ -119,10 +119,10 @@ function TemplateDetailPage() {
               <p className="mt-2 text-base text-background/60 truncate">{template.subject}</p>
             </div>
             <div className="flex flex-col items-end gap-2 shrink-0">
-              <span className={`text-[10px] uppercase tracking-widest font-bold px-3 py-1 border border-background/20 ${STATUS_STYLE[template.status] ?? "bg-secondary text-secondary-foreground"}`}>
+              <span className={`text-[10px] uppercase tracking-widest font-bold px-3 py-1 border ${STATUS_STYLE[template.status] ?? "border-foreground/20 bg-foreground/5 text-foreground"}`}>
                 {template.status}
               </span>
-              <span className={`text-[10px] uppercase tracking-widest font-bold px-3 py-1 ${CATEGORY_STYLE[template.category] ?? "bg-secondary text-secondary-foreground"}`}>
+              <span className={`text-[10px] uppercase tracking-widest font-bold px-3 py-1 border ${CATEGORY_STYLE[template.category] ?? "border-foreground/20 text-muted-foreground"}`}>
                 {template.category}
               </span>
             </div>

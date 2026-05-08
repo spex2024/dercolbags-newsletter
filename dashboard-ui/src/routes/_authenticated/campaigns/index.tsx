@@ -12,7 +12,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
 import {
   Table,
   TableBody,
@@ -21,11 +20,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Plus, BarChart3, Send, X, Eye, TrendingUp } from "lucide-react"
+import { Plus, BarChart3, Send, X, Eye, TrendingUp, Mail } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { format } from "date-fns"
 import { toast } from "sonner"
 import type { CampaignStatus } from "@/services/api/types"
+
+const STATUS_BADGE: Record<string, string> = {
+  draft:     "border-foreground/20 bg-foreground/5 text-foreground",
+  scheduled: "border-foreground/40 text-foreground",
+  sending:   "border-foreground bg-foreground text-background",
+  sent:      "border-foreground bg-foreground text-background",
+  cancelled: "border-destructive/40 bg-destructive/5 text-destructive",
+}
 
 export const Route = createFileRoute("/_authenticated/campaigns/")({
   beforeLoad: ({ context }) => requirePageAccess(context, "campaigns"),
@@ -74,16 +81,7 @@ function CampaignsPage() {
     },
   })
 
-  const getStatusVariant = (s: CampaignStatus) => {
-    const map = {
-      draft: "secondary",
-      scheduled: "outline",
-      sending: "outline",
-      sent: "default",
-      cancelled: "destructive",
-    } as const
-    return map[s] ?? "secondary"
-  }
+  const total = data?.data?.pagination?.total ?? 0
 
   const goToDetail = (id: string) =>
     navigate({ to: "/campaigns/$id", params: { id } })
@@ -97,7 +95,7 @@ function CampaignsPage() {
           </p>
           <h1 className="text-4xl font-black tracking-tight">Campaigns</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Create and manage email campaigns
+            {isLoading ? "Loading…" : `${total.toLocaleString()} campaign${total !== 1 ? "s" : ""}`}
           </p>
         </div>
         <div className="flex gap-2 mt-1 shrink-0">
@@ -176,8 +174,14 @@ function CampaignsPage() {
                 ))
               ) : !data?.data?.items?.length ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="py-12 text-center">
-                    <p className="text-muted-foreground">No campaigns found</p>
+                  <TableCell colSpan={6} className="py-20 text-center">
+                    <div className="flex flex-col items-center gap-3">
+                      <Mail className="h-8 w-8 text-muted-foreground/40" />
+                      <p className="text-sm font-semibold">No campaigns found</p>
+                      <p className="text-xs text-muted-foreground">
+                        {status !== "all" ? "Try a different status filter" : "Create your first campaign to get started"}
+                      </p>
+                    </div>
                   </TableCell>
                 </TableRow>
               ) : (
@@ -200,9 +204,9 @@ function CampaignsPage() {
                         {campaign.subject}
                       </TableCell>
                       <TableCell>
-                        <Badge variant={getStatusVariant(campaign.status)}>
+                        <span className={`text-[10px] uppercase tracking-widest font-bold px-2 py-0.5 border ${STATUS_BADGE[campaign.status] ?? STATUS_BADGE.draft}`}>
                           {campaign.status}
-                        </Badge>
+                        </span>
                       </TableCell>
                       <TableCell className="hidden capitalize sm:table-cell">
                         {campaign.targetType}

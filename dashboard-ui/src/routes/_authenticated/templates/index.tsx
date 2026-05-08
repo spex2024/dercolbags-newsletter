@@ -6,21 +6,12 @@ import { emailTemplatesApi } from "@/services/api/email-templates"
 import { useBrand } from "@/contexts/BrandContext"
 import { Button } from "@/components/ui/button"
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table"
-import { Plus, Eye, Copy, Edit } from "lucide-react"
+import { Plus, Copy, FileText } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { format } from "date-fns"
 import { toast } from "sonner"
@@ -31,17 +22,17 @@ export const Route = createFileRoute("/_authenticated/templates/")({
   component: TemplatesPage,
 })
 
-const STATUS_STYLES: Record<TemplateStatus, string> = {
-  draft: "bg-secondary text-secondary-foreground",
-  active: "bg-foreground text-background",
-  archived: "border border-foreground/20 text-muted-foreground",
+const STATUS_BADGE: Record<TemplateStatus, string> = {
+  draft:    "border-foreground/20 bg-foreground/5 text-foreground",
+  active:   "border-foreground bg-foreground text-background",
+  archived: "border-foreground/20 text-muted-foreground",
 }
 
-const CATEGORY_STYLES: Record<string, string> = {
-  system: "bg-foreground/8 text-foreground",
-  auth: "bg-foreground/8 text-foreground",
-  campaign: "bg-foreground text-background",
-  notification: "bg-secondary text-secondary-foreground",
+const CATEGORY_BADGE: Record<string, string> = {
+  system:       "border-foreground/20 text-muted-foreground",
+  auth:         "border-foreground/20 text-muted-foreground",
+  campaign:     "border-foreground bg-foreground text-background",
+  notification: "border-foreground/30 text-foreground",
 }
 
 function TemplatesPage() {
@@ -55,9 +46,9 @@ function TemplatesPage() {
     queryKey: ["email-templates", currentBrand, category, statusFilter],
     queryFn: () =>
       emailTemplatesApi.list({
-        brand: currentBrand,
+        brand:    currentBrand,
         category: category === "all" ? undefined : category,
-        status: statusFilter === "all" ? undefined : statusFilter,
+        status:   statusFilter === "all" ? undefined : statusFilter,
       }),
   })
 
@@ -70,18 +61,18 @@ function TemplatesPage() {
     onError: () => toast.error("Failed to duplicate template"),
   })
 
+  const total = data?.data?.items?.length ?? 0
+
   return (
     <div className="space-y-6">
 
-      {/* Page header */}
+      {/* Header */}
       <div className="flex items-start justify-between gap-4 pb-6 border-b-2">
         <div>
-          <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground mb-1">
-            Content
-          </p>
+          <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground mb-1">Content</p>
           <h1 className="text-4xl font-black tracking-tight">Email Templates</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Design and manage reusable email templates
+            {isLoading ? "Loading…" : `${total} template${total !== 1 ? "s" : ""}`}
           </p>
         </div>
         <Button
@@ -95,10 +86,7 @@ function TemplatesPage() {
 
       {/* Filters */}
       <div className="flex gap-3">
-        <Select
-          value={category}
-          onValueChange={(v) => setCategory(v as TemplateCategory | "all")}
-        >
+        <Select value={category} onValueChange={(v) => setCategory(v as TemplateCategory | "all")}>
           <SelectTrigger className="w-44">
             <SelectValue placeholder="Category" />
           </SelectTrigger>
@@ -110,11 +98,7 @@ function TemplatesPage() {
             <SelectItem value="notification">Notification</SelectItem>
           </SelectContent>
         </Select>
-
-        <Select
-          value={statusFilter}
-          onValueChange={(v) => setStatusFilter(v as TemplateStatus | "all")}
-        >
+        <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as TemplateStatus | "all")}>
           <SelectTrigger className="w-40">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
@@ -132,101 +116,80 @@ function TemplatesPage() {
         <Table>
           <TableHeader>
             <TableRow className="bg-foreground hover:bg-foreground border-b-2 border-foreground">
-              <TableHead className="text-background text-[10px] uppercase tracking-[0.15em] font-bold py-3 h-auto">
-                Name
-              </TableHead>
-              <TableHead className="hidden md:table-cell text-background text-[10px] uppercase tracking-[0.15em] font-bold py-3 h-auto">
-                Template Key
-              </TableHead>
-              <TableHead className="text-background text-[10px] uppercase tracking-[0.15em] font-bold py-3 h-auto">
-                Category
-              </TableHead>
-              <TableHead className="text-background text-[10px] uppercase tracking-[0.15em] font-bold py-3 h-auto">
-                Status
-              </TableHead>
-              <TableHead className="hidden lg:table-cell text-background text-[10px] uppercase tracking-[0.15em] font-bold py-3 h-auto">
-                Updated
-              </TableHead>
-              <TableHead className="text-right text-background text-[10px] uppercase tracking-[0.15em] font-bold py-3 h-auto">
-                Actions
-              </TableHead>
+              <TableHead className="text-background text-[10px] uppercase tracking-[0.15em] font-bold py-3 h-auto">Name</TableHead>
+              <TableHead className="hidden md:table-cell text-background text-[10px] uppercase tracking-[0.15em] font-bold py-3 h-auto">Key</TableHead>
+              <TableHead className="text-background text-[10px] uppercase tracking-[0.15em] font-bold py-3 h-auto">Category</TableHead>
+              <TableHead className="text-background text-[10px] uppercase tracking-[0.15em] font-bold py-3 h-auto">Status</TableHead>
+              <TableHead className="hidden lg:table-cell text-background text-[10px] uppercase tracking-[0.15em] font-bold py-3 h-auto">Updated</TableHead>
+              <TableHead className="text-right text-background text-[10px] uppercase tracking-[0.15em] font-bold py-3 h-auto">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              Array.from({ length: 8 }).map((_, i) => (
-                <TableRow key={i} className="border-b">
-                  <TableCell><Skeleton className="h-4 w-40" /></TableCell>
-                  <TableCell className="hidden md:table-cell"><Skeleton className="h-4 w-32" /></TableCell>
+              Array.from({ length: 6 }).map((_, i) => (
+                <TableRow key={i}>
+                  <TableCell><Skeleton className="h-4 w-40" /><Skeleton className="h-3 w-28 mt-1" /></TableCell>
+                  <TableCell className="hidden md:table-cell"><Skeleton className="h-5 w-32" /></TableCell>
                   <TableCell><Skeleton className="h-5 w-20" /></TableCell>
-                  <TableCell><Skeleton className="h-5 w-14" /></TableCell>
+                  <TableCell><Skeleton className="h-5 w-16" /></TableCell>
                   <TableCell className="hidden lg:table-cell"><Skeleton className="h-4 w-24" /></TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-1">
-                      <Skeleton className="h-7 w-7" />
-                      <Skeleton className="h-7 w-7" />
-                      <Skeleton className="h-7 w-7" />
-                    </div>
-                  </TableCell>
+                  <TableCell className="text-right"><Skeleton className="h-7 w-16 ml-auto" /></TableCell>
                 </TableRow>
               ))
             ) : !data?.data?.items?.length ? (
               <TableRow>
-                <TableCell colSpan={6} className="py-16 text-center">
-                  <p className="text-sm text-muted-foreground">No templates found</p>
+                <TableCell colSpan={6} className="py-20 text-center">
+                  <div className="flex flex-col items-center gap-3">
+                    <FileText className="h-8 w-8 text-muted-foreground/40" />
+                    <p className="text-sm font-semibold">No templates found</p>
+                    <p className="text-xs text-muted-foreground">
+                      {category !== "all" || statusFilter !== "all"
+                        ? "Try adjusting your filters"
+                        : "Create your first template to get started"}
+                    </p>
+                  </div>
                 </TableCell>
               </TableRow>
             ) : (
-              data.data.items.map((template) => (
-                <TableRow key={template.id} className="border-b hover:bg-muted/30 transition-colors">
+              data.data.items.map((tpl) => (
+                <TableRow
+                  key={tpl.id}
+                  className="cursor-pointer hover:bg-muted/30 transition-colors"
+                  onClick={() => navigate({ to: "/templates/$id", params: { id: tpl.id } })}
+                >
                   <TableCell>
-                    <p className="font-semibold text-sm">{template.name}</p>
-                    <p className="text-[11px] text-muted-foreground truncate max-w-[200px]">
-                      {template.subject}
-                    </p>
+                    <p className="font-semibold text-sm">{tpl.name}</p>
+                    <p className="text-[11px] text-muted-foreground truncate max-w-[220px]">{tpl.subject}</p>
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
-                    <code className="bg-muted px-1.5 py-0.5 text-[11px] font-mono">
-                      {template.templateKey}
+                    <code className="bg-muted px-1.5 py-0.5 text-[11px] font-mono border border-border">
+                      {tpl.templateKey}
                     </code>
                   </TableCell>
                   <TableCell>
-                    <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 ${CATEGORY_STYLES[template.category] ?? "bg-secondary text-secondary-foreground"}`}>
-                      {template.category}
+                    <span className={`text-[10px] uppercase tracking-widest font-bold px-2 py-0.5 border ${CATEGORY_BADGE[tpl.category] ?? CATEGORY_BADGE.system}`}>
+                      {tpl.category}
                     </span>
                   </TableCell>
                   <TableCell>
-                    <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 ${STATUS_STYLES[template.status]}`}>
-                      {template.status}
+                    <span className={`text-[10px] uppercase tracking-widest font-bold px-2 py-0.5 border ${STATUS_BADGE[tpl.status]}`}>
+                      {tpl.status}
                     </span>
                   </TableCell>
-                  <TableCell className="hidden lg:table-cell text-sm text-muted-foreground">
-                    {format(new Date(template.updatedAt), "MMM d, yyyy")}
+                  <TableCell className="hidden lg:table-cell text-sm text-muted-foreground tabular-nums">
+                    {format(new Date(tpl.updatedAt), "MMM d, yyyy")}
                   </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-1">
-                      <Button variant="ghost" size="icon" title="Preview">
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        title="Duplicate"
-                        onClick={() => duplicateMutation.mutate(template.id)}
-                      >
-                        <Copy className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        title="Edit"
-                        onClick={() =>
-                          navigate({ to: "/templates/$id", params: { id: template.id } })
-                        }
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                    </div>
+                  <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      title="Duplicate"
+                      disabled={duplicateMutation.isPending}
+                      onClick={() => duplicateMutation.mutate(tpl.id)}
+                      className="h-7 px-2"
+                    >
+                      <Copy className="h-3.5 w-3.5" />
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))

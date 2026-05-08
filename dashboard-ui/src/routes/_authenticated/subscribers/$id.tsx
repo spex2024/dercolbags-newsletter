@@ -57,10 +57,10 @@ function SubscriberDetailPage() {
     : subscriber.email[0].toUpperCase()
 
   const STATUS_STYLE: Record<string, string> = {
-    new: "bg-secondary text-secondary-foreground",
-    contacted: "bg-foreground text-background",
-    converted: "bg-foreground text-background",
-    spam: "bg-destructive text-white",
+    new:       "border-foreground/20 bg-foreground/5 text-foreground",
+    contacted: "border-foreground bg-foreground text-background",
+    converted: "border-emerald-600 bg-emerald-50 text-emerald-700",
+    spam:      "border-destructive/40 bg-destructive/5 text-destructive",
   }
 
   return (
@@ -93,7 +93,7 @@ function SubscriberDetailPage() {
           </div>
 
           <div className="flex flex-col items-end gap-2 shrink-0">
-            <span className={`text-[10px] uppercase tracking-widest font-bold px-3 py-1 border border-background/20 ${STATUS_STYLE[subscriber.status] ?? "bg-secondary text-secondary-foreground"}`}>
+            <span className={`text-[10px] uppercase tracking-widest font-bold px-3 py-1 border ${STATUS_STYLE[subscriber.status] ?? "border-foreground/20 bg-foreground/5 text-foreground"}`}>
               {subscriber.status}
             </span>
             <span className={`text-[10px] uppercase tracking-widest font-bold px-3 py-1 border ${

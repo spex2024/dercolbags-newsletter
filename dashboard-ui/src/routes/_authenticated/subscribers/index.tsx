@@ -7,22 +7,13 @@ import { useBrand } from "@/contexts/BrandContext"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Plus, Search } from "lucide-react"
+import { Plus, Search, Users } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { format } from "date-fns"
 import type { SubscriberStatus } from "@/services/api/types"
@@ -31,6 +22,13 @@ export const Route = createFileRoute("/_authenticated/subscribers/")({
   beforeLoad: ({ context }) => requirePageAccess(context, "subscribers"),
   component: SubscribersPage,
 })
+
+const STATUS_BADGE: Record<SubscriberStatus, string> = {
+  new:       "border-foreground/20 bg-foreground/5 text-foreground",
+  contacted: "border-foreground bg-foreground text-background",
+  converted: "border-emerald-600 bg-emerald-50 text-emerald-700",
+  spam:      "border-destructive/40 bg-destructive/5 text-destructive",
+}
 
 function SubscribersPage() {
   const navigate = useNavigate()
@@ -43,33 +41,27 @@ function SubscribersPage() {
     queryKey: ["subscribers", currentBrand, status, searchQuery, page],
     queryFn: () =>
       subscribersApi.list({
-        brand: currentBrand,
+        brand:  currentBrand,
         status: status === "all" ? undefined : status,
         search: searchQuery || undefined,
         page,
-        limit: 20,
+        limit:  20,
       }),
   })
 
-  const STATUS_LABEL: Record<SubscriberStatus, string> = {
-    new: "bg-secondary text-secondary-foreground",
-    contacted: "bg-foreground text-background",
-    converted: "bg-foreground text-background",
-    spam: "bg-destructive/10 text-destructive",
-  }
+  const total    = data?.data?.pagination?.total ?? 0
+  const totalPgs = data?.data?.pagination?.totalPages ?? 1
 
   return (
     <div className="space-y-6">
 
-      {/* Page header */}
+      {/* Header */}
       <div className="flex items-start justify-between gap-4 pb-6 border-b-2">
         <div>
-          <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground mb-1">
-            Management
-          </p>
+          <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground mb-1">Management</p>
           <h1 className="text-4xl font-black tracking-tight">Subscribers</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Manage your newsletter subscribers
+            {isLoading ? "Loading…" : `${total.toLocaleString()} subscriber${total !== 1 ? "s" : ""}`}
           </p>
         </div>
         <Button
@@ -92,10 +84,7 @@ function SubscribersPage() {
             className="pl-10"
           />
         </div>
-        <Select
-          value={status}
-          onValueChange={(v) => { setStatus(v as SubscriberStatus | "all"); setPage(1) }}
-        >
+        <Select value={status} onValueChange={(v) => { setStatus(v as SubscriberStatus | "all"); setPage(1) }}>
           <SelectTrigger className="w-full sm:w-44">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
@@ -114,30 +103,25 @@ function SubscribersPage() {
         <Table>
           <TableHeader>
             <TableRow className="bg-foreground hover:bg-foreground border-b-2 border-foreground">
-              <TableHead className="text-background text-[10px] uppercase tracking-[0.15em] font-bold py-3 h-auto">
-                Subscriber
-              </TableHead>
-              <TableHead className="hidden md:table-cell text-background text-[10px] uppercase tracking-[0.15em] font-bold py-3 h-auto">
-                Status
-              </TableHead>
-              <TableHead className="hidden md:table-cell text-background text-[10px] uppercase tracking-[0.15em] font-bold py-3 h-auto">
-                Source
-              </TableHead>
-              <TableHead className="hidden lg:table-cell text-background text-[10px] uppercase tracking-[0.15em] font-bold py-3 h-auto">
-                Location
-              </TableHead>
-              <TableHead className="hidden sm:table-cell text-background text-[10px] uppercase tracking-[0.15em] font-bold py-3 h-auto">
-                Subscribed
-              </TableHead>
-              <TableHead className="text-right text-background text-[10px] uppercase tracking-[0.15em] font-bold py-3 h-auto">
-                Actions
-              </TableHead>
+              {["Subscriber", "Status", "Source", "Location", "Added"].map((h, i) => (
+                <TableHead
+                  key={h}
+                  className={`text-background text-[10px] uppercase tracking-[0.15em] font-bold py-3 h-auto
+                    ${i === 1 ? "hidden md:table-cell" : ""}
+                    ${i === 2 ? "hidden md:table-cell" : ""}
+                    ${i === 3 ? "hidden lg:table-cell" : ""}
+                    ${i === 4 ? "hidden sm:table-cell" : ""}
+                  `}
+                >
+                  {h}
+                </TableHead>
+              ))}
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
               Array.from({ length: 8 }).map((_, i) => (
-                <TableRow key={i} className="border-b">
+                <TableRow key={i}>
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <Skeleton className="h-8 w-8 shrink-0" />
@@ -147,69 +131,62 @@ function SubscribersPage() {
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="hidden md:table-cell"><Skeleton className="h-5 w-16" /></TableCell>
+                  <TableCell className="hidden md:table-cell"><Skeleton className="h-5 w-20" /></TableCell>
                   <TableCell className="hidden md:table-cell"><Skeleton className="h-4 w-24" /></TableCell>
                   <TableCell className="hidden lg:table-cell"><Skeleton className="h-4 w-20" /></TableCell>
-                  <TableCell className="hidden sm:table-cell"><Skeleton className="h-5 w-16" /></TableCell>
-                  <TableCell className="text-right"><Skeleton className="ml-auto h-7 w-12" /></TableCell>
+                  <TableCell className="hidden sm:table-cell"><Skeleton className="h-4 w-20" /></TableCell>
                 </TableRow>
               ))
             ) : !data?.data?.items?.length ? (
               <TableRow>
-                <TableCell colSpan={6} className="py-16 text-center">
-                  <p className="text-sm text-muted-foreground">No subscribers found</p>
+                <TableCell colSpan={5} className="py-20 text-center">
+                  <div className="flex flex-col items-center gap-3">
+                    <Users className="h-8 w-8 text-muted-foreground/40" />
+                    <p className="text-sm font-semibold">No subscribers found</p>
+                    <p className="text-xs text-muted-foreground">
+                      {searchQuery || status !== "all"
+                        ? "Try adjusting your filters"
+                        : "Add your first subscriber to get started"}
+                    </p>
+                  </div>
                 </TableCell>
               </TableRow>
             ) : (
-              data.data.items.map((subscriber) => (
-                <TableRow key={subscriber.id} className="border-b hover:bg-muted/30 transition-colors">
+              data.data.items.map((sub) => (
+                <TableRow
+                  key={sub.id}
+                  className="cursor-pointer hover:bg-muted/30 transition-colors"
+                  onClick={() => navigate({ to: "/subscribers/$id", params: { id: sub.id } })}
+                >
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <Avatar className="h-8 w-8 rounded-none shrink-0">
                         <AvatarFallback className="rounded-none bg-foreground text-background text-[11px] font-black">
-                          {subscriber.name?.[0]?.toUpperCase() || subscriber.email[0].toUpperCase()}
+                          {sub.name?.[0]?.toUpperCase() ?? sub.email[0].toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold">
-                          {subscriber.name || "No name"}
-                        </p>
-                        <p className="truncate text-[11px] text-muted-foreground">
-                          {subscriber.email}
-                        </p>
+                        <p className="truncate text-sm font-semibold">{sub.name || "—"}</p>
+                        <p className="truncate text-[11px] text-muted-foreground">{sub.email}</p>
                       </div>
                     </div>
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
-                    <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 ${STATUS_LABEL[subscriber.status] ?? "bg-secondary text-secondary-foreground"}`}>
-                      {subscriber.status}
+                    <span className={`text-[10px] uppercase tracking-widest font-bold px-2 py-0.5 border ${STATUS_BADGE[sub.status] ?? STATUS_BADGE.new}`}>
+                      {sub.status}
                     </span>
                   </TableCell>
-                  <TableCell className="hidden md:table-cell text-sm text-muted-foreground">
-                    {subscriber.source}
+                  <TableCell className="hidden md:table-cell text-sm text-muted-foreground capitalize">
+                    {sub.source.replace(/_/g, " ")}
                   </TableCell>
                   <TableCell className="hidden lg:table-cell text-sm text-muted-foreground">
-                    {subscriber.location || "—"}
+                    {sub.location || "—"}
                   </TableCell>
                   <TableCell className="hidden sm:table-cell">
-                    <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 border ${
-                      subscriber.isSubscribed
-                        ? "border-foreground/20 bg-foreground/5 text-foreground"
-                        : "border-destructive/20 bg-destructive/5 text-destructive"
-                    }`}>
-                      {subscriber.isSubscribed ? "Active" : "Unsub"}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() =>
-                        navigate({ to: "/subscribers/$id", params: { id: subscriber.id } })
-                      }
-                    >
-                      View
-                    </Button>
+                    <p className="text-sm tabular-nums">{format(new Date(sub.createdAt), "MMM d, yyyy")}</p>
+                    <p className={`text-[10px] uppercase tracking-widest font-bold mt-0.5 ${sub.isSubscribed ? "text-foreground/50" : "text-destructive"}`}>
+                      {sub.isSubscribed ? "Active" : "Unsubscribed"}
+                    </p>
                   </TableCell>
                 </TableRow>
               ))
@@ -219,26 +196,16 @@ function SubscribersPage() {
       </div>
 
       {/* Pagination */}
-      {data?.data?.pagination && data.data.pagination.totalPages > 1 && (
+      {totalPgs > 1 && (
         <div className="flex items-center justify-between border-t-2 pt-4">
           <p className="text-xs text-muted-foreground uppercase tracking-wider">
-            Page {data.data.pagination.page} of {data.data.pagination.totalPages} · {data.data.pagination.total} total
+            Page {page} of {totalPgs} · {total.toLocaleString()} total
           </p>
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page <= 1}
-              onClick={() => setPage((p) => p - 1)}
-            >
+            <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
               Previous
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page >= data.data.pagination.totalPages}
-              onClick={() => setPage((p) => p + 1)}
-            >
+            <Button variant="outline" size="sm" disabled={page >= totalPgs} onClick={() => setPage((p) => p + 1)}>
               Next
             </Button>
           </div>
