@@ -104,6 +104,9 @@ const CATEGORY_BG: Record<string, string> = {
   minimal:      "bg-zinc-600",
   reengagement: "bg-violet-900",
   event:        "bg-amber-800",
+  ecommerce:    "bg-orange-800",
+  loyalty:      "bg-yellow-700",
+  feedback:     "bg-cyan-800",
 }
 
 // ── Main component ──────────────────────────────────────────────────────────

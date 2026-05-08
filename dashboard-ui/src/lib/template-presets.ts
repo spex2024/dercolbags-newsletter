@@ -2,7 +2,7 @@ export interface PresetTemplate {
   id: string
   name: string
   description: string
-  category: "welcome" | "newsletter" | "promotion" | "notification" | "minimal" | "reengagement" | "event"
+  category: "welcome" | "newsletter" | "promotion" | "notification" | "minimal" | "reengagement" | "event" | "ecommerce" | "loyalty" | "feedback"
   thumbnail: string
   design: Record<string, unknown>
 }
@@ -461,6 +461,387 @@ export const presetTemplates: PresetTemplate[] = [
           row("r-pt-footer", [col("c-pt-footer", [footer("t-pt-footer")], "#f4f4f5")], "0px"),
         ],
         values: bodyValues("#ffffff"),
+      },
+      schemaVersion: 16,
+    },
+  },
+
+
+  // ── 10. Abandoned Cart ────────────────────────────────────────────────────
+  {
+    id: "abandoned-cart",
+    name: "Abandoned Cart",
+    description: "Remind shoppers they left items behind — recover lost sales",
+    category: "ecommerce",
+    thumbnail: "10",
+    design: {
+      counters: { u_row: 5, u_column: 5, u_content_text: 5, u_content_button: 2, u_content_divider: 1 },
+      body: {
+        rows: [
+          row("r-ac-header", [brandHeader("ac-hdr")], "0px"),
+          row("r-ac-hero", [col("c-ac-hero", [
+            textBlock("t-ac-icon",
+              `<p style="font-size:40px;text-align:center;margin:0;">🛒</p>`,
+              "40px 40px 12px"),
+            textBlock("t-ac-title",
+              `<p style="font-size:30px;font-weight:900;color:#000000;text-transform:uppercase;letter-spacing:-0.5px;text-align:center;line-height:115%;margin:0;">You left something<br/>behind, {{name}}.</p>`,
+              "0px 40px 16px"),
+            textBlock("t-ac-sub",
+              `<p style="font-size:16px;color:#555555;text-align:center;line-height:170%;">Your cart is waiting. The items you selected are still available — but they won't be for long. Complete your order before they sell out.</p>`,
+              "0px 40px 28px"),
+            btn("b-ac-primary", "Complete My Order →", "{{ctaUrl}}", "#000000", "#ffffff", "0px 40px 12px"),
+            btn("b-ac-secondary", "View My Cart", "{{ctaUrl}}", "#ffffff", "#000000", "0px 40px 36px"),
+          ])], "#ffffff"),
+          row("r-ac-div", [col("c-ac-div", [divider("d-ac", "#e5e5e5", "0px 40px")])], "0px"),
+          row("r-ac-reassure", [col("c-ac-reassure", [
+            textBlock("t-ac-reassure",
+              `<table width="100%" style="font-size:12px;color:#777777;line-height:200%;text-align:center;">
+                 <tr>
+                   <td width="33%" style="padding:0 8px;">🔒 <strong>Secure Checkout</strong></td>
+                   <td width="33%" style="padding:0 8px;">🚚 <strong>Fast Delivery</strong></td>
+                   <td width="33%" style="padding:0 8px;">↩️ <strong>Easy Returns</strong></td>
+                 </tr>
+               </table>`,
+              "20px 40px 28px"),
+          ])], "#f9f9f9"),
+          row("r-ac-footer", [col("c-ac-footer", [footer("t-ac-footer")], "#f4f4f5")], "0px"),
+        ],
+        values: bodyValues("#f4f4f5", "Your cart is waiting — complete your order today."),
+      },
+      schemaVersion: 16,
+    },
+  },
+
+  // ── 11. Loyalty Reward ────────────────────────────────────────────────────
+  {
+    id: "loyalty-reward",
+    name: "Loyalty Reward",
+    description: "Celebrate a milestone and reward your most loyal customers",
+    category: "loyalty",
+    thumbnail: "11",
+    design: {
+      counters: { u_row: 5, u_column: 5, u_content_text: 5, u_content_button: 1, u_content_divider: 2 },
+      body: {
+        rows: [
+          row("r-lr-header", [brandHeader("lr-hdr", "Loyalty Programme")], "0px"),
+          row("r-lr-hero", [col("c-lr-hero", [
+            textBlock("t-lr-congrats",
+              `<p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:4px;color:#B8860B;text-align:center;margin:0;">🏆 Congratulations</p>`,
+              "40px 40px 12px"),
+            textBlock("t-lr-title",
+              `<p style="font-size:34px;font-weight:900;color:#000000;text-transform:uppercase;letter-spacing:-1px;text-align:center;line-height:110%;margin:0;">You've Earned<br/>a Reward!</p>`,
+              "0px 40px 16px"),
+            textBlock("t-lr-sub",
+              `<p style="font-size:16px;color:#555555;text-align:center;line-height:170%;">Hi {{name}}, thank you for your continued loyalty. As one of our valued customers, you've unlocked an exclusive reward just for you.</p>`,
+              "0px 40px 24px"),
+            divider("d-lr-1", "#e5e5e5", "0px 40px"),
+          ])], "#ffffff"),
+          row("r-lr-reward", [col("c-lr-reward", [
+            textBlock("t-lr-code",
+              `<p style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:3px;color:#999999;text-align:center;margin:0 0 12px;">Your Exclusive Code</p>
+               <p style="font-size:32px;font-weight:900;color:#000000;font-family:monospace;text-align:center;letter-spacing:6px;background:#f4f4f4;border:2px dashed #cccccc;padding:20px;margin:0;">LOYAL20</p>
+               <p style="font-size:13px;color:#888888;text-align:center;margin:16px 0 0;">20% off your next order · Expires in 30 days</p>`,
+              "28px 40px 28px"),
+            divider("d-lr-2", "#e5e5e5", "0px 40px"),
+            btn("b-lr-cta", "Redeem Reward →", "{{ctaUrl}}", "#000000", "#ffffff", "20px 40px 40px"),
+          ])], "#ffffff"),
+          row("r-lr-div", [col("c-lr-div", [divider("d-lr-3", "#e5e5e5", "0px 40px")])], "0px"),
+          row("r-lr-footer", [col("c-lr-footer", [footer("t-lr-footer")], "#f4f4f5")], "0px"),
+        ],
+        values: bodyValues("#f4f4f5", "A reward is waiting for you — you've earned it."),
+      },
+      schemaVersion: 16,
+    },
+  },
+
+  // ── 12. Feedback / Survey ─────────────────────────────────────────────────
+  {
+    id: "feedback-survey",
+    name: "Feedback & Survey",
+    description: "Collect customer opinions with a simple, friendly survey invite",
+    category: "feedback",
+    thumbnail: "12",
+    design: {
+      counters: { u_row: 4, u_column: 4, u_content_text: 4, u_content_button: 1, u_content_divider: 1 },
+      body: {
+        rows: [
+          row("r-fb-header", [brandHeader("fb-hdr")], "0px"),
+          row("r-fb-hero", [col("c-fb-hero", [
+            textBlock("t-fb-icon",
+              `<p style="font-size:40px;text-align:center;margin:0;">💬</p>`,
+              "40px 40px 12px"),
+            textBlock("t-fb-title",
+              `<p style="font-size:30px;font-weight:900;color:#000000;text-transform:uppercase;letter-spacing:-0.5px;text-align:center;line-height:115%;margin:0;">How Are We Doing,<br/>{{name}}?</p>`,
+              "0px 40px 16px"),
+            textBlock("t-fb-body",
+              `<p style="font-size:16px;color:#555555;text-align:center;line-height:175%;">Your feedback shapes everything we do. It only takes 2 minutes and helps us serve you better. We read every single response.</p>`,
+              "0px 40px 28px"),
+            btn("b-fb-cta", "Share My Feedback →", "{{ctaUrl}}", "#000000", "#ffffff", "0px 40px 16px"),
+            textBlock("t-fb-note",
+              `<p style="font-size:12px;color:#999999;text-align:center;margin:0;">Takes less than 2 minutes · Completely anonymous</p>`,
+              "0px 40px 40px"),
+          ])], "#ffffff"),
+          row("r-fb-div", [col("c-fb-div", [divider("d-fb", "#e5e5e5", "0px 40px")])], "0px"),
+          row("r-fb-footer", [col("c-fb-footer", [footer("t-fb-footer")], "#f4f4f5")], "0px"),
+        ],
+        values: bodyValues("#f4f4f5", "We'd love to hear what you think."),
+      },
+      schemaVersion: 16,
+    },
+  },
+
+  // ── 13. Referral Programme ────────────────────────────────────────────────
+  {
+    id: "referral",
+    name: "Referral Programme",
+    description: "Invite customers to refer friends and earn rewards",
+    category: "promotion",
+    thumbnail: "13",
+    design: {
+      counters: { u_row: 5, u_column: 5, u_content_text: 5, u_content_button: 1, u_content_divider: 2 },
+      body: {
+        rows: [
+          row("r-ref-header", [brandHeader("ref-hdr", "Referral Programme")], "0px"),
+          row("r-ref-hero", [col("c-ref-hero", [
+            textBlock("t-ref-title",
+              `<p style="font-size:34px;font-weight:900;color:#000000;text-transform:uppercase;letter-spacing:-1px;text-align:center;line-height:110%;margin:0;">Refer a Friend.<br/>Both of You Win.</p>`,
+              "44px 40px 16px"),
+            textBlock("t-ref-sub",
+              `<p style="font-size:16px;color:#555555;text-align:center;line-height:170%;">Share {{brandName}} with someone you love and get rewarded when they make their first purchase. It's our way of saying thank you.</p>`,
+              "0px 40px 28px"),
+            divider("d-ref-1", "#e5e5e5", "0px 40px"),
+          ])], "#ffffff"),
+          row("r-ref-how", [col("c-ref-how", [
+            textBlock("t-ref-steps",
+              `<table width="100%" style="font-size:14px;color:#444444;line-height:200%;">
+                 <tr>
+                   <td width="36" style="font-size:20px;font-weight:900;color:#000000;vertical-align:top;">01</td>
+                   <td style="vertical-align:top;padding-left:12px;"><strong>Share your unique link</strong><br/><span style="color:#888888;font-size:13px;">Send it by WhatsApp, email, or social media</span></td>
+                 </tr>
+                 <tr><td colspan="2" style="height:12px;"></td></tr>
+                 <tr>
+                   <td style="font-size:20px;font-weight:900;color:#000000;vertical-align:top;">02</td>
+                   <td style="vertical-align:top;padding-left:12px;"><strong>Your friend signs up and orders</strong><br/><span style="color:#888888;font-size:13px;">They get 10% off their first purchase</span></td>
+                 </tr>
+                 <tr><td colspan="2" style="height:12px;"></td></tr>
+                 <tr>
+                   <td style="font-size:20px;font-weight:900;color:#000000;vertical-align:top;">03</td>
+                   <td style="vertical-align:top;padding-left:12px;"><strong>You earn a reward</strong><br/><span style="color:#888888;font-size:13px;">Get credit applied to your next order</span></td>
+                 </tr>
+               </table>`,
+              "20px 40px 28px"),
+            divider("d-ref-2", "#e5e5e5", "0px 40px"),
+            btn("b-ref-cta", "Get My Referral Link →", "{{ctaUrl}}", "#000000", "#ffffff", "20px 40px 40px"),
+          ])], "#ffffff"),
+          row("r-ref-div", [col("c-ref-div", [divider("d-ref-3", "#e5e5e5", "0px 40px")])], "0px"),
+          row("r-ref-footer", [col("c-ref-footer", [footer("t-ref-footer")], "#f4f4f5")], "0px"),
+        ],
+        values: bodyValues("#f4f4f5", "Share the love — both of you benefit."),
+      },
+      schemaVersion: 16,
+    },
+  },
+
+  // ── 14. Seasonal Campaign ─────────────────────────────────────────────────
+  {
+    id: "seasonal-campaign",
+    name: "Seasonal Campaign",
+    description: "Holiday or seasonal themed email with a festive feel",
+    category: "promotion",
+    thumbnail: "14",
+    design: {
+      counters: { u_row: 4, u_column: 4, u_content_text: 4, u_content_button: 1, u_content_divider: 1 },
+      body: {
+        rows: [
+          row("r-sc-header", [{
+            id: "c-sc-header",
+            contents: [
+              textBlock("t-sc-season",
+                `<p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:4px;color:rgba(255,255,255,0.7);text-align:center;margin:0 0 8px;">Holiday Collection</p>
+                 <p style="font-size:26px;font-weight:900;color:#ffffff;text-transform:uppercase;letter-spacing:1px;text-align:center;margin:0;">{{brandName}}</p>`,
+                "32px 40px 32px"),
+            ],
+            values: { backgroundColor: "#1a3a2a", padding: "0px", _meta: { htmlID: "c-sc-header", htmlClassNames: "u_column" } },
+          }], "0px"),
+          row("r-sc-hero", [col("c-sc-hero", [
+            textBlock("t-sc-title",
+              `<p style="font-size:36px;font-weight:900;color:#000000;text-transform:uppercase;letter-spacing:-1px;text-align:center;line-height:110%;margin:0;">The Season's<br/>Best Picks</p>`,
+              "44px 40px 16px"),
+            textBlock("t-sc-body",
+              `<p style="font-size:16px;color:#555555;text-align:center;line-height:175%;">Whether you're shopping for yourself or finding the perfect gift, our seasonal collection has something special for everyone. Explore curated picks at exclusive prices.</p>`,
+              "0px 40px 28px"),
+            btn("b-sc-cta", "Shop the Collection →", "{{ctaUrl}}", "#1a3a2a", "#ffffff", "0px 40px 0px"),
+            textBlock("t-sc-urgency",
+              `<p style="font-size:12px;color:#999999;text-align:center;margin:0;">Free shipping on all orders · Limited stock available</p>`,
+              "12px 40px 40px"),
+          ])], "#ffffff"),
+          row("r-sc-div", [col("c-sc-div", [divider("d-sc", "#e5e5e5", "0px 40px")])], "0px"),
+          row("r-sc-footer", [col("c-sc-footer", [footer("t-sc-footer")], "#f4f4f5")], "0px"),
+        ],
+        values: bodyValues("#f4f4f5", "Our seasonal picks are here — shop now."),
+      },
+      schemaVersion: 16,
+    },
+  },
+
+  // ── 15. Two-Column Feature ────────────────────────────────────────────────
+  {
+    id: "two-column",
+    name: "Two-Column Feature",
+    description: "Side-by-side layout showcasing two products or articles",
+    category: "newsletter",
+    thumbnail: "15",
+    design: {
+      counters: { u_row: 4, u_column: 6, u_content_text: 6, u_content_button: 2, u_content_divider: 1 },
+      body: {
+        rows: [
+          row("r-tc-header", [brandHeader("tc-hdr", "Featured")], "0px"),
+          row("r-tc-intro", [col("c-tc-intro", [
+            textBlock("t-tc-intro",
+              `<p style="font-size:24px;font-weight:900;color:#000000;text-transform:uppercase;letter-spacing:-0.5px;text-align:center;line-height:120%;margin:0;">Two Things<br/>Worth Your Attention</p>`,
+              "36px 40px 24px"),
+          ])], "#ffffff"),
+          {
+            id: "r-tc-cols",
+            cells: [1, 1],
+            columns: [
+              {
+                id: "c-tc-left",
+                contents: [
+                  textBlock("t-tc-left-tag",
+                    `<p style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:3px;color:#999999;margin:0;">Feature 01</p>`,
+                    "28px 24px 8px"),
+                  textBlock("t-tc-left-title",
+                    `<p style="font-size:18px;font-weight:900;color:#000000;text-transform:uppercase;line-height:120%;margin:0;">First<br/>Highlight</p>`,
+                    "0px 24px 10px"),
+                  textBlock("t-tc-left-body",
+                    `<p style="font-size:13px;color:#555555;line-height:170%;">Describe your first feature, product, or story here. Keep it punchy and link to the full article.</p>`,
+                    "0px 24px 20px"),
+                  btn("b-tc-left", "Learn More", "{{ctaUrl}}", "#000000", "#ffffff", "0px 24px 32px"),
+                ],
+                values: { backgroundColor: "#ffffff", padding: "0px", borderRight: "2px solid #e5e5e5", _meta: { htmlID: "c-tc-left", htmlClassNames: "u_column" } },
+              },
+              {
+                id: "c-tc-right",
+                contents: [
+                  textBlock("t-tc-right-tag",
+                    `<p style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:3px;color:#999999;margin:0;">Feature 02</p>`,
+                    "28px 24px 8px"),
+                  textBlock("t-tc-right-title",
+                    `<p style="font-size:18px;font-weight:900;color:#000000;text-transform:uppercase;line-height:120%;margin:0;">Second<br/>Highlight</p>`,
+                    "0px 24px 10px"),
+                  textBlock("t-tc-right-body",
+                    `<p style="font-size:13px;color:#555555;line-height:170%;">Describe your second feature, product, or story here. Keep it punchy and link to the full article.</p>`,
+                    "0px 24px 20px"),
+                  btn("b-tc-right", "Learn More", "{{ctaUrl}}", "#000000", "#ffffff", "0px 24px 32px"),
+                ],
+                values: { backgroundColor: "#ffffff", padding: "0px", _meta: { htmlID: "c-tc-right", htmlClassNames: "u_column" } },
+              },
+            ],
+            values: {
+              padding: "0px 10px",
+              _meta: { htmlID: "r-tc-cols", htmlClassNames: "u_row" },
+              ...FLAGS,
+            },
+          },
+          row("r-tc-footer", [col("c-tc-footer", [
+            divider("d-tc", "#e5e5e5", "0px 30px"),
+            footer("t-tc-footer"),
+          ], "#f4f4f5")], "0px"),
+        ],
+        values: bodyValues("#f4f4f5", "Two things you need to see this week."),
+      },
+      schemaVersion: 16,
+    },
+  },
+
+  // ── 16. Back in Stock ─────────────────────────────────────────────────────
+  {
+    id: "back-in-stock",
+    name: "Back in Stock",
+    description: "Alert subscribers that a previously sold-out item is available again",
+    category: "ecommerce",
+    thumbnail: "16",
+    design: {
+      counters: { u_row: 4, u_column: 4, u_content_text: 4, u_content_button: 1, u_content_divider: 1 },
+      body: {
+        rows: [
+          row("r-bs-header", [brandHeader("bs-hdr")], "0px"),
+          row("r-bs-hero", [col("c-bs-hero", [
+            textBlock("t-bs-badge",
+              `<p style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:4px;color:#ffffff;background:#16a34a;display:inline-block;padding:6px 16px;text-align:center;margin:0;">Back in Stock</p>`,
+              "40px 40px 16px"),
+            textBlock("t-bs-title",
+              `<p style="font-size:32px;font-weight:900;color:#000000;text-transform:uppercase;letter-spacing:-0.5px;text-align:center;line-height:110%;margin:0;">The Wait<br/>Is Over.</p>`,
+              "0px 40px 16px"),
+            textBlock("t-bs-body",
+              `<p style="font-size:16px;color:#555555;text-align:center;line-height:170%;">Hi {{name}}, great news — the item you've been waiting for is back. These tend to sell out fast, so don't wait too long.</p>`,
+              "0px 40px 28px"),
+            btn("b-bs-cta", "Shop Before It's Gone →", "{{ctaUrl}}", "#16a34a", "#ffffff", "0px 40px 16px"),
+            textBlock("t-bs-warning",
+              `<p style="font-size:12px;color:#999999;text-align:center;margin:0;">Stock is limited. Order now to avoid disappointment.</p>`,
+              "0px 40px 36px"),
+          ])], "#ffffff"),
+          row("r-bs-div", [col("c-bs-div", [divider("d-bs", "#e5e5e5", "0px 40px")])], "0px"),
+          row("r-bs-footer", [col("c-bs-footer", [footer("t-bs-footer")], "#f4f4f5")], "0px"),
+        ],
+        values: bodyValues("#f4f4f5", "It's back — grab yours before it sells out again."),
+      },
+      schemaVersion: 16,
+    },
+  },
+
+  // ── 17. Weekly Digest ─────────────────────────────────────────────────────
+  {
+    id: "weekly-digest",
+    name: "Weekly Digest",
+    description: "A structured digest with three numbered items for weekly sends",
+    category: "newsletter",
+    thumbnail: "17",
+    design: {
+      counters: { u_row: 7, u_column: 7, u_content_text: 8, u_content_button: 1, u_content_divider: 4 },
+      body: {
+        rows: [
+          row("r-wd-header", [brandHeader("wd-hdr", "Weekly Digest")], "0px"),
+          row("r-wd-intro", [col("c-wd-intro", [
+            textBlock("t-wd-date",
+              `<p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:4px;color:#999999;text-align:center;margin:0;">This Week's Highlights</p>`,
+              "28px 40px 8px"),
+            textBlock("t-wd-title",
+              `<p style="font-size:26px;font-weight:900;color:#000000;text-transform:uppercase;letter-spacing:-0.5px;text-align:center;margin:0;">3 Things to Know</p>`,
+              "0px 40px 20px"),
+            divider("d-wd-0", "#000000", "0px 40px"),
+          ])], "#ffffff"),
+          row("r-wd-1", [col("c-wd-1", [
+            textBlock("t-wd-1",
+              `<p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:4px;color:#999999;margin:0 0 6px;">01 ·</p>
+               <p style="font-size:18px;font-weight:900;color:#000000;text-transform:uppercase;margin:0 0 10px;">Story One Headline Here</p>
+               <p style="font-size:14px;color:#555555;line-height:175%;margin:0;">Write a short summary of your first story or update. Two to three sentences is ideal — give them enough to be curious, then link them to the full piece.</p>`,
+              "24px 40px 24px"),
+            divider("d-wd-1", "#e5e5e5", "0px 40px"),
+          ])], "#ffffff"),
+          row("r-wd-2", [col("c-wd-2", [
+            textBlock("t-wd-2",
+              `<p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:4px;color:#999999;margin:0 0 6px;">02 ·</p>
+               <p style="font-size:18px;font-weight:900;color:#000000;text-transform:uppercase;margin:0 0 10px;">Story Two Headline Here</p>
+               <p style="font-size:14px;color:#555555;line-height:175%;margin:0;">Second item in the digest. Keep the same format for consistency — short, scannable, with a clear point and a reason to care.</p>`,
+              "24px 40px 24px"),
+            divider("d-wd-2", "#e5e5e5", "0px 40px"),
+          ])], "#ffffff"),
+          row("r-wd-3", [col("c-wd-3", [
+            textBlock("t-wd-3",
+              `<p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:4px;color:#999999;margin:0 0 6px;">03 ·</p>
+               <p style="font-size:18px;font-weight:900;color:#000000;text-transform:uppercase;margin:0 0 10px;">Story Three Headline Here</p>
+               <p style="font-size:14px;color:#555555;line-height:175%;margin:0;">Third item. This is often a good spot for a tip, a product highlight, or an upcoming event. End on something actionable.</p>`,
+              "24px 40px 24px"),
+            divider("d-wd-3", "#e5e5e5", "0px 40px"),
+          ])], "#ffffff"),
+          row("r-wd-cta", [col("c-wd-cta", [
+            btn("b-wd-cta", "Read Everything →", "{{ctaUrl}}", "#000000", "#ffffff", "20px 40px 40px"),
+          ])], "#ffffff"),
+          row("r-wd-footer", [col("c-wd-footer", [footer("t-wd-footer")], "#f4f4f5")], "0px"),
+        ],
+        values: bodyValues("#f4f4f5", "Your 3 highlights for this week."),
       },
       schemaVersion: 16,
     },

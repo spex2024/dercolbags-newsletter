@@ -477,7 +477,8 @@ function CampaignDetailPage() {
                       >
                         <div className={`relative flex h-24 flex-col items-center justify-center border-b-2 border-inherit gap-1 ${{
                           welcome:"bg-emerald-800",newsletter:"bg-blue-900",promotion:"bg-red-900",
-                          notification:"bg-zinc-800",minimal:"bg-zinc-600",reengagement:"bg-violet-900",event:"bg-amber-800"
+                          notification:"bg-zinc-800",minimal:"bg-zinc-600",reengagement:"bg-violet-900",
+                          event:"bg-amber-800",ecommerce:"bg-orange-800",loyalty:"bg-yellow-700",feedback:"bg-cyan-800"
                         }[preset.category] ?? "bg-zinc-700"}`}>
                           <span className="text-3xl font-black text-white/20 select-none">{preset.thumbnail}</span>
                           <span className="text-[9px] uppercase tracking-widest font-bold text-white/50">{preset.category}</span>
