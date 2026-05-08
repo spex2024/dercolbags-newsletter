@@ -268,24 +268,24 @@ function SubscribersPage() {
                     {sub.location || "—"}
                   </TableCell>
                   <TableCell className="hidden sm:table-cell">
-                    {tab === "bounced" || tab === "unsubscribed" ? (
-                      <div>
-                        <p className="text-sm tabular-nums">
-                          {sub.unsubscribedAt
-                            ? format(new Date(sub.unsubscribedAt), "MMM d, yyyy")
-                            : "—"}
-                        </p>
-                        <p className={`text-[10px] uppercase tracking-widest font-bold mt-0.5 ${
-                          tab === "bounced" ? "text-amber-600" : "text-muted-foreground"
-                        }`}>
-                          {tab === "bounced" ? "Bounced" : "Unsubscribed"}
-                        </p>
-                      </div>
-                    ) : (
+                    {sub.isSubscribed ? (
                       <div>
                         <p className="text-sm tabular-nums">{format(new Date(sub.createdAt), "MMM d, yyyy")}</p>
                         <p className="text-[10px] uppercase tracking-widest font-bold mt-0.5 text-foreground/50">
                           Active
+                        </p>
+                      </div>
+                    ) : (
+                      <div>
+                        <p className="text-sm tabular-nums">
+                          {sub.unsubscribedAt
+                            ? format(new Date(sub.unsubscribedAt), "MMM d, yyyy")
+                            : format(new Date(sub.createdAt), "MMM d, yyyy")}
+                        </p>
+                        <p className={`text-[10px] uppercase tracking-widest font-bold mt-0.5 ${
+                          sub.unsubscribeReason === "bounce" ? "text-amber-600" : "text-destructive"
+                        }`}>
+                          {sub.unsubscribeReason === "bounce" ? "Bounced" : "Unsubscribed"}
                         </p>
                       </div>
                     )}
