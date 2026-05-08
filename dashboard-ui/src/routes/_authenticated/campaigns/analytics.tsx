@@ -40,14 +40,14 @@ function StatCard({
   )
 }
 
-function RateBar({ value, max = 100 }: { value: number; max?: number }) {
-  const pct = Math.min((value / max) * 100, 100)
+function RateBar({ value }: { value: number }) {
+  const pct = Math.min(value, 100)
   return (
-    <div className="flex items-center gap-2">
-      <div className="h-1.5 w-20 bg-muted overflow-hidden rounded-full">
-        <div className="h-full bg-foreground rounded-full" style={{ width: `${pct}%` }} />
+    <div className="flex items-center gap-2.5 min-w-[120px]">
+      <div className="h-2 flex-1 bg-foreground/10 overflow-hidden">
+        <div className="h-full bg-foreground transition-all" style={{ width: `${pct}%` }} />
       </div>
-      <span className="tabular-nums text-sm font-semibold">{value}%</span>
+      <span className="tabular-nums text-sm font-bold w-10 text-right shrink-0">{value}%</span>
     </div>
   )
 }
@@ -124,58 +124,56 @@ function CampaignsAnalyticsPage() {
               <TableHead className="text-background text-[10px] uppercase tracking-[0.15em] font-bold py-3 h-auto">
                 Click Rate
               </TableHead>
-              <TableHead className="hidden lg:table-cell text-background text-[10px] uppercase tracking-[0.15em] font-bold py-3 h-auto text-right">
-                Clicks
-              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <TableRow key={i}>
-                  <TableCell><Skeleton className="h-4 w-40" /></TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-40 mb-1" />
+                    <Skeleton className="h-3 w-28" />
+                  </TableCell>
                   <TableCell className="hidden sm:table-cell"><Skeleton className="h-4 w-24" /></TableCell>
-                  <TableCell className="text-right"><Skeleton className="h-4 w-12 ml-auto" /></TableCell>
-                  <TableCell className="hidden md:table-cell text-right"><Skeleton className="h-4 w-12 ml-auto" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                  <TableCell className="hidden lg:table-cell text-right"><Skeleton className="h-4 w-10 ml-auto" /></TableCell>
+                  <TableCell className="text-right"><Skeleton className="h-4 w-10 ml-auto" /></TableCell>
+                  <TableCell className="hidden md:table-cell text-right"><Skeleton className="h-4 w-10 ml-auto" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-32" /></TableCell>
                 </TableRow>
               ))
             ) : campaigns.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="py-16 text-center">
-                  <p className="text-muted-foreground text-sm">No sent campaigns yet</p>
+                <TableCell colSpan={6} className="py-16 text-center">
+                  <Send className="h-8 w-8 mx-auto mb-3 text-muted-foreground/30" />
+                  <p className="text-sm font-semibold">No sent campaigns yet</p>
+                  <p className="text-xs text-muted-foreground mt-1">Analytics appear once a campaign has been sent</p>
                 </TableCell>
               </TableRow>
             ) : (
               campaigns.map((c) => (
                 <TableRow
                   key={c.id}
-                  className="cursor-pointer"
+                  className="cursor-pointer hover:bg-muted/30 transition-colors"
                   onClick={() => navigate({ to: "/campaigns/$id", params: { id: c.id } })}
                 >
-                  <TableCell>
-                    <p className="font-semibold leading-snug">{c.name}</p>
-                    <p className="text-xs text-muted-foreground truncate max-w-[200px]">{c.subject}</p>
+                  <TableCell className="py-4">
+                    <p className="font-semibold text-sm leading-snug">{c.name}</p>
+                    <p className="text-[11px] text-muted-foreground truncate max-w-[200px] mt-0.5">{c.subject}</p>
                   </TableCell>
-                  <TableCell className="hidden sm:table-cell text-sm text-muted-foreground">
+                  <TableCell className="hidden sm:table-cell text-sm text-muted-foreground tabular-nums">
                     {c.sentAt ? format(new Date(c.sentAt), "MMM d, yyyy") : "—"}
                   </TableCell>
-                  <TableCell className="text-right tabular-nums font-medium">
+                  <TableCell className="text-right tabular-nums font-semibold text-sm">
                     {c.totalRecipients.toLocaleString()}
                   </TableCell>
                   <TableCell className="hidden md:table-cell text-right tabular-nums text-sm text-muted-foreground">
                     {c.sent.toLocaleString()}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="py-4">
                     <RateBar value={c.openRate} />
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="py-4">
                     <RateBar value={c.clickRate} />
-                  </TableCell>
-                  <TableCell className="hidden lg:table-cell text-right tabular-nums text-sm text-muted-foreground">
-                    {c.clicked.toLocaleString()}
                   </TableCell>
                 </TableRow>
               ))
