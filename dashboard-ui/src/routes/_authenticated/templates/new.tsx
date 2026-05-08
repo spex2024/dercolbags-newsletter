@@ -27,9 +27,6 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
@@ -46,29 +43,74 @@ type Step = "select" | "design"
 
 function generatePreviewHtml(design: Record<string, unknown>): string {
   const body = design.body as any
-  if (!body?.rows) return "<p>Empty template</p>"
+  if (!body?.rows) return `<p style="padding:20px;color:#999;font-family:Arial,sans-serif;">No preview available</p>`
 
-  let html = ""
+  const bodyBg  = body.values?.backgroundColor || "#f4f4f5"
+  const colFont = body.values?.fontFamily?.value || "arial,helvetica,sans-serif"
+
+  let rowsHtml = ""
+
   for (const row of body.rows) {
-    for (const col of row.columns || []) {
-      for (const content of col.contents || []) {
-        if (content.type === "text") {
-          html += `<div style="padding: ${content.values?.containerPadding || "10px"}; text-align: ${content.values?.textAlign || "left"}; line-height: ${content.values?.lineHeight || "160%"};">${content.values?.text || ""}</div>`
-        } else if (content.type === "button") {
-          const colors = content.values?.buttonColors || {}
-          html += `<div style="padding: ${content.values?.containerPadding || "10px"}; text-align: center;"><div style="display: inline-block; padding: ${content.values?.padding || "12px 30px"}; background-color: ${colors.backgroundColor || "#1a1a1a"}; color: ${colors.color || "#fff"}; border-radius: ${content.values?.borderRadius || "4px"}; font-size: 14px;">${content.values?.text || "Button"}</div></div>`
-        } else if (content.type === "image") {
-          const src = content.values?.src?.url || ""
+    const rowBg  = row.values?.columnsBackgroundColor || row.values?.backgroundColor || ""
+    const rowPad = row.values?.padding || "0px"
+
+    let colsHtml = ""
+    const cols   = row.columns || []
+    const colW   = cols.length > 1 ? `${Math.floor(100 / cols.length)}%` : "100%"
+
+    for (const col of cols) {
+      const colBg = col.values?.backgroundColor || "#ffffff"
+      let contentsHtml = ""
+
+      for (const c of col.contents || []) {
+        const cp = c.values?.containerPadding || "10px"
+        const ta = c.values?.textAlign || "left"
+
+        if (c.type === "text") {
+          contentsHtml += `<div style="padding:${cp};text-align:${ta};line-height:${c.values?.lineHeight || "160%"};">${c.values?.text || ""}</div>`
+
+        } else if (c.type === "button") {
+          const bc = c.values?.buttonColors || {}
+          const bp = c.values?.padding || "14px 28px"
+          contentsHtml += `<div style="padding:${cp};text-align:center;">
+            <div style="display:inline-block;padding:${bp};background:${bc.backgroundColor || "#000"};color:${bc.color || "#fff"};font-size:13px;font-weight:700;">
+              ${c.values?.text || "Button"}
+            </div></div>`
+
+        } else if (c.type === "image") {
+          const src = c.values?.src?.url || ""
           if (src) {
-            html += `<div style="padding: ${content.values?.containerPadding || "0px"}; text-align: center;"><img src="${src}" alt="${content.values?.altText || ""}" style="max-width: 100%; height: auto;" /></div>`
+            contentsHtml += `<div style="padding:${cp};text-align:center;">
+              <img src="${src}" alt="${c.values?.altText || ""}" style="max-width:100%;height:auto;display:block;margin:0 auto;" />
+            </div>`
           }
+
+        } else if (c.type === "divider") {
+          const border = c.values?.border || {}
+          const color  = border.borderTopColor || "#e5e5e5"
+          const width  = border.borderTopWidth || "1px"
+          contentsHtml += `<div style="padding:${cp};">
+            <div style="border-top:${width} solid ${color};"></div>
+          </div>`
         }
       }
+
+      colsHtml += `<td style="width:${colW};vertical-align:top;background:${colBg};">${contentsHtml}</td>`
     }
+
+    rowsHtml += `<tr style="background:${rowBg};">
+      <td style="padding:${rowPad};">
+        <table width="100%" cellpadding="0" cellspacing="0">${colsHtml}</table>
+      </td>
+    </tr>`
   }
 
-  const bgColor = body.values?.backgroundColor || "#f5f5f5"
-  return `<div style="background-color: ${bgColor}; padding: 10px; font-family: Arial, sans-serif;">${html}</div>`
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:${bodyBg};font-family:${colFont};">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:${bodyBg};">
+    ${rowsHtml}
+  </table>
+</body></html>`
 }
 
 function NewTemplatePage() {
@@ -244,96 +286,89 @@ function NewTemplatePage() {
       >
         <DialogContent
           showCloseButton={false}
-          className="w-[95vw] max-w-[1300px] h-[85vh] p-0 overflow-hidden gap-0 sm:max-w-[1300px]"
+          className="w-[95vw] max-w-[1200px] p-0 overflow-hidden gap-0 sm:max-w-[1200px]"
+          style={{ height: "88vh" }}
         >
-          <div className="flex h-full">
-            {/* Left: Preview */}
-            <div className="flex-1 overflow-y-auto bg-muted border-r p-8 flex flex-col gap-4">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+          <div className="flex h-full overflow-hidden">
+
+            {/* ── Left: scrollable preview ── */}
+            <div className="flex flex-col flex-1 min-w-0 overflow-hidden border-r-2 border-foreground">
+              {/* sticky label */}
+              <div className="shrink-0 bg-foreground text-background px-6 py-4">
+                <p className="text-[10px] uppercase tracking-[0.25em] font-bold text-background/50 mb-0.5">
                   Template Preview
                 </p>
-                <p className="text-xl font-bold mt-0.5">{configPreset?.name}</p>
+                <p className="text-base font-black">{configPreset?.name}</p>
               </div>
-              <div
-                className="mx-auto w-full border-2 border-foreground bg-white shadow-md"
-                style={{ maxWidth: 620 }}
-                dangerouslySetInnerHTML={{
-                  __html: configPreset
-                    ? generatePreviewHtml(configPreset.design)
-                    : "",
-                }}
-              />
+              {/* scrollable area — left side only */}
+              <div className="flex-1 overflow-y-auto bg-muted/40 p-6">
+                <div
+                  className="mx-auto bg-white border-2 border-foreground/10 shadow-md"
+                  style={{ maxWidth: 600 }}
+                  dangerouslySetInnerHTML={{
+                    __html: configPreset ? generatePreviewHtml(configPreset.design) : "",
+                  }}
+                />
+              </div>
             </div>
 
-            {/* Right: Form — fixed 400px wide */}
-            <div className="w-[400px] shrink-0 flex flex-col">
-              <div className="p-6 pb-4 border-b">
-                <p className="text-lg font-bold">Configure Template</p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Fill in the details, then open the visual editor.
+            {/* ── Right: fixed form panel — never scrolls with preview ── */}
+            <div className="w-[380px] shrink-0 flex flex-col overflow-hidden">
+              {/* header */}
+              <div className="shrink-0 px-6 py-5 border-b-2 border-foreground">
+                <p className="text-base font-black">Configure Template</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Set the details, then open the visual editor.
                 </p>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              {/* scrollable fields */}
+              <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
                 <div className="space-y-1.5">
-                  <Label htmlFor="modal-name">
+                  <Label className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
                     Template Name <span className="text-destructive">*</span>
                   </Label>
                   <Input
-                    id="modal-name"
-                    placeholder="Welcome Email v1"
+                    placeholder="e.g. May Day Promo"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label>
+                  <Label className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
                     Template Key <span className="text-destructive">*</span>
                   </Label>
-                  <Select value={templateKey} onValueChange={(v) => setTemplateKey(v ?? "")}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select key" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="subscriber_confirmation">
-                        subscriber_confirmation
-                      </SelectItem>
-                      <SelectItem value="unsubscribe_confirmation">
-                        unsubscribe_confirmation
-                      </SelectItem>
-                      <SelectItem value="user_invite">user_invite</SelectItem>
-                      <SelectItem value="password_reset">
-                        password_reset
-                      </SelectItem>
-                      <SelectItem value="campaign_default">
-                        campaign_default
-                      </SelectItem>
-                      <SelectItem value="campaign_test">
-                        campaign_test
-                      </SelectItem>
-                      <SelectItem value="admin_new_subscriber_notification">
-                        admin_notification
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Input
+                    placeholder="e.g. may_day_promo"
+                    value={templateKey}
+                    onChange={(e) =>
+                      setTemplateKey(
+                        e.target.value.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "")
+                      )
+                    }
+                    className="font-mono text-sm"
+                  />
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">
+                    A unique identifier for this template. Lowercase letters, numbers and underscores only — e.g. <code className="bg-muted px-1 rounded text-[10px]">welcome_new_user</code>
+                  </p>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="modal-subject">
+                  <Label className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
                     Email Subject <span className="text-destructive">*</span>
                   </Label>
                   <Input
-                    id="modal-subject"
-                    placeholder="Welcome to {{brandName}}!"
+                    placeholder="e.g. Don't miss our May Day sale!"
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label>Category</Label>
+                  <Label className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
+                    Category
+                  </Label>
                   <Select
                     value={category}
                     onValueChange={(v) => setCategory(v as TemplateCategory)}
@@ -342,19 +377,27 @@ function NewTemplatePage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="system">System</SelectItem>
-                      <SelectItem value="auth">Auth</SelectItem>
                       <SelectItem value="campaign">Campaign</SelectItem>
                       <SelectItem value="notification">Notification</SelectItem>
+                      <SelectItem value="auth">Auth</SelectItem>
+                      <SelectItem value="system">System</SelectItem>
                     </SelectContent>
                   </Select>
+                  <p className="text-[11px] text-muted-foreground">
+                    Use <strong>Campaign</strong> for marketing emails.
+                  </p>
                 </div>
               </div>
 
-              <div className="p-6 pt-4 border-t space-y-2">
+              {/* pinned footer */}
+              <div className="shrink-0 px-6 py-4 border-t-2 border-foreground space-y-2 bg-muted/20">
+                {!canOpenEditor && (
+                  <p className="text-[11px] text-muted-foreground text-center">
+                    Fill in all required fields to continue.
+                  </p>
+                )}
                 <Button
-                  className="w-full"
-                  size="lg"
+                  className="w-full shadow-md hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
                   disabled={!canOpenEditor}
                   onClick={handleOpenEditor}
                 >
