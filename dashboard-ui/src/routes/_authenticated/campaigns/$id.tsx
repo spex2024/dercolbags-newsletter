@@ -3,10 +3,19 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { requirePageAccess } from "@/lib/permissions"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { campaignsApi } from "@/services/api/campaigns"
+import { emailTemplatesApi } from "@/services/api/email-templates"
+import { useBrand } from "@/contexts/BrandContext"
 import { EmailBuilder, type EmailBuilderRef } from "@/components/EmailBuilder"
+import { presetTemplates } from "@/lib/template-presets"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import {
   ArrowLeft,
   Calendar,
@@ -23,6 +32,8 @@ import {
   MousePointerClick,
   FlaskConical,
   Copy,
+  FileText,
+  LayoutTemplate,
 } from "lucide-react"
 import { format } from "date-fns"
 import { toast } from "sonner"
@@ -70,6 +81,7 @@ function CampaignDetailPage() {
   const { id } = Route.useParams()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const { currentBrand } = useBrand()
 
   const [isEditing, setIsEditing] = useState(false)
   const [editData, setEditData] = useState<{
@@ -82,8 +94,16 @@ function CampaignDetailPage() {
   const [showTestInput, setShowTestInput] = useState(false)
   const [testEmail, setTestEmail] = useState("")
   const [editorReady, setEditorReady] = useState(false)
+  const [showTemplatePicker, setShowTemplatePicker] = useState(false)
+  const [pickerSelected, setPickerSelected] = useState<{ label: string; design: Record<string, unknown> } | null>(null)
   const testInputRef = useRef<HTMLInputElement>(null)
   const emailBuilderRef = useRef<EmailBuilderRef>(null)
+
+  const { data: savedTemplatesData } = useQuery({
+    queryKey: ["email-templates", currentBrand, "campaign"],
+    queryFn: () => emailTemplatesApi.list({ brand: currentBrand, category: "campaign", status: "active" }),
+    enabled: showTemplatePicker,
+  })
 
   const { data, isLoading } = useQuery({
     queryKey: ["campaign", id],
@@ -350,12 +370,23 @@ function CampaignDetailPage() {
               <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-background">
                 Email Content
               </p>
-              {!editorReady && (
-                <div className="flex items-center gap-2 text-background/60">
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  <span className="text-[11px]">Loading editor…</span>
-                </div>
-              )}
+              <div className="flex items-center gap-3">
+                {!editorReady && (
+                  <div className="flex items-center gap-2 text-background/60">
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    <span className="text-[11px]">Loading editor…</span>
+                  </div>
+                )}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-7 border-background/30 text-background bg-transparent hover:bg-background/10 hover:text-background text-[10px] uppercase tracking-wider shadow-none"
+                  onClick={() => { setPickerSelected(null); setShowTemplatePicker(true) }}
+                >
+                  <LayoutTemplate className="mr-1.5 h-3.5 w-3.5" />
+                  Change Template
+                </Button>
+              </div>
             </div>
             <EmailBuilder
               ref={emailBuilderRef}
@@ -369,6 +400,124 @@ function CampaignDetailPage() {
             />
           </div>
         </div>
+
+        {/* Template picker dialog */}
+        <Dialog open={showTemplatePicker} onOpenChange={setShowTemplatePicker}>
+          <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-lg font-black">Change Template</DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-6 py-2">
+              {/* Saved campaign templates */}
+              {(savedTemplatesData?.data?.items?.length ?? 0) > 0 && (
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-muted-foreground mb-3">
+                    Your Campaign Templates
+                  </p>
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    {savedTemplatesData!.data.items.map((t) => {
+                      const isSelected = pickerSelected?.label === t.name
+                      return (
+                        <button
+                          key={t.id}
+                          onClick={() => setPickerSelected({ label: t.name, design: t.designJson as Record<string, unknown> })}
+                          className={`border-2 text-left transition-all hover:-translate-y-[2px] hover:shadow-md ${isSelected ? "border-foreground shadow-[4px_4px_0px_0px_oklch(0.1_0_0)]" : "border-foreground/30 hover:border-foreground"}`}
+                        >
+                          <div className="relative h-24 overflow-hidden border-b-2 border-inherit bg-muted/10">
+                            <div className="pointer-events-none absolute inset-0 origin-top-left scale-[0.3] w-[333%] h-[333%]">
+                              <div className="prose prose-sm max-w-none p-4" dangerouslySetInnerHTML={{ __html: t.htmlContent }} />
+                            </div>
+                            {isSelected && (
+                              <div className="absolute top-1.5 right-1.5 flex h-5 w-5 items-center justify-center bg-foreground text-background">
+                                <Check className="h-3 w-3" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="p-3">
+                            <p className="text-sm font-black truncate">{t.name}</p>
+                          </div>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Presets */}
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-muted-foreground mb-3">
+                  Preset Templates
+                </p>
+                <div className="grid gap-3 sm:grid-cols-3">
+                  {presetTemplates.filter((p) => p.id !== "blank").map((preset) => {
+                    const isSelected = pickerSelected?.label === preset.name
+                    return (
+                      <button
+                        key={preset.id}
+                        onClick={() => setPickerSelected({ label: preset.name, design: preset.design })}
+                        className={`border-2 text-left transition-all hover:-translate-y-[2px] hover:shadow-md ${isSelected ? "border-foreground shadow-[4px_4px_0px_0px_oklch(0.1_0_0)]" : "border-foreground/30 hover:border-foreground"}`}
+                      >
+                        <div className="relative flex h-24 flex-col items-center justify-center border-b-2 border-inherit bg-muted/10">
+                          <span className="text-4xl font-black text-foreground/10">{preset.thumbnail}</span>
+                          {isSelected && (
+                            <div className="absolute top-1.5 right-1.5 flex h-5 w-5 items-center justify-center bg-foreground text-background">
+                              <Check className="h-3 w-3" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="p-3">
+                          <p className="text-sm font-black">{preset.name}</p>
+                          <p className="text-[11px] text-muted-foreground truncate">{preset.description}</p>
+                        </div>
+                      </button>
+                    )
+                  })}
+
+                  {/* Blank */}
+                  <button
+                    onClick={() => setPickerSelected({ label: "Blank", design: {} })}
+                    className={`border-2 text-left transition-all hover:-translate-y-[2px] hover:shadow-md ${pickerSelected?.label === "Blank" ? "border-foreground shadow-[4px_4px_0px_0px_oklch(0.1_0_0)] border-solid" : "border-dashed border-foreground/30 hover:border-foreground"}`}
+                  >
+                    <div className="relative flex h-24 flex-col items-center justify-center border-b-2 border-inherit bg-muted/10">
+                      <FileText className="h-8 w-8 text-muted-foreground/30" />
+                      {pickerSelected?.label === "Blank" && (
+                        <div className="absolute top-1.5 right-1.5 flex h-5 w-5 items-center justify-center bg-foreground text-background">
+                          <Check className="h-3 w-3" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-3">
+                      <p className="text-sm font-black">Blank Canvas</p>
+                      <p className="text-[11px] text-muted-foreground">Start from scratch</p>
+                    </div>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between border-t-2 pt-4">
+              <p className="text-xs text-muted-foreground">
+                {pickerSelected ? <>Selected: <span className="font-bold text-foreground">{pickerSelected.label}</span></> : "No template selected"}
+              </p>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setShowTemplatePicker(false)}>Cancel</Button>
+                <Button
+                  disabled={!pickerSelected}
+                  onClick={() => {
+                    if (!pickerSelected) return
+                    emailBuilderRef.current?.loadDesign(pickerSelected.design)
+                    setShowTemplatePicker(false)
+                    toast.success(`Template "${pickerSelected.label}" loaded`)
+                  }}
+                  className="shadow-md hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
+                >
+                  Apply Template
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     )
   }
