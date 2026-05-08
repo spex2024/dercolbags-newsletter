@@ -124,147 +124,171 @@ function footer(id: string) {
   )
 }
 
-// ── Logo header helpers ──────────────────────────────────────────────────────
+// ── Brand header builders ─────────────────────────────────────────────────────
+//
+// Each header contains TWO separately deletable blocks:
+//   Block 1 — Logo image placeholder  → DELETE to use text only
+//   Block 2 — Brand name text         → DELETE to use logo only
+//   Keep both                         → Logo + text (default)
+//
+// Four layout variants exist for visual variety across templates.
 
-// Logo image block (replace src to use a real logo)
-function logoImg(id: string) {
-  return {
-    id,
-    type: "image",
-    values: {
-      containerPadding: "24px 40px",
-      src: {
-        url: "https://placehold.co/180x52/000000/ffffff?text=YOUR+LOGO",
-        width: 180,
-        height: 52,
-      },
-      textAlign: "center",
-      altText: "{{brandName}}",
-      action: { name: "web", values: { href: "", target: "_blank" } },
-      _meta: { htmlID: id, htmlClassNames: "u_content_image" },
-      ...FLAGS,
-    },
-  }
-}
-
-// Style E — centred logo on white, clean and minimal
-function brandHeaderLogo(id: string) {
-  return {
-    id: `${id}-col`,
-    contents: [ logoImg(`${id}-img`) ],
-    values: {
-      backgroundColor: "#ffffff",
-      padding: "0px",
-      _meta: { htmlID: `${id}-col`, htmlClassNames: "u_column" },
-    },
-  }
-}
-
-// Style F — logo on inverted black background
-function brandHeaderLogoDark(id: string, subtitle = "") {
-  return {
-    id: `${id}-col`,
-    contents: [
-      {
-        id: `${id}-img`,
-        type: "image",
-        values: {
-          containerPadding: subtitle ? "24px 40px 10px" : "24px 40px",
-          src: {
-            url: "https://placehold.co/180x52/ffffff/000000?text=YOUR+LOGO",
-            width: 180,
-            height: 52,
-          },
-          textAlign: "center",
-          altText: "{{brandName}}",
-          action: { name: "web", values: { href: "", target: "_blank" } },
-          _meta: { htmlID: `${id}-img`, htmlClassNames: "u_content_image" },
-          ...FLAGS,
-        },
-      },
-      ...(subtitle
-        ? [textBlock(
-            `${id}-sub`,
-            `<p style="font-size:11px;color:rgba(255,255,255,0.55);text-align:center;letter-spacing:4px;text-transform:uppercase;margin:0;">${subtitle}</p>`,
-            "0px 40px 20px",
-          )]
-        : []),
-    ],
-    values: {
-      backgroundColor: "#000000",
-      padding: "0px",
-      _meta: { htmlID: `${id}-col`, htmlClassNames: "u_column" },
-    },
-  }
-}
-
-// ── Text header helpers ──────────────────────────────────────────────────────
-
-// Style A — inverted black full-width header (most templates)
+// ── Variant 1: Light background, logo centred above text ─────────────────────
 function brandHeader(id: string, subtitle = "") {
   return {
     id: `${id}-col`,
     contents: [
+      // Block 1 — Logo (delete for text-only)
+      {
+        id: `${id}-logo`,
+        type: "image",
+        values: {
+          containerPadding: "24px 40px 6px",
+          src: { url: "https://placehold.co/160x46/1a1a1a/ffffff?text=YOUR+LOGO", width: 160, height: 46 },
+          textAlign: "center",
+          altText: "{{brandName}}",
+          action: { name: "web", values: { href: "", target: "_blank" } },
+          _meta: { htmlID: `${id}-logo`, htmlClassNames: "u_content_image" },
+          ...FLAGS,
+        },
+      },
+      // Block 2 — Text (delete for logo-only)
       textBlock(
         `${id}-text`,
-        `<p style="font-size:22px;font-weight:900;color:#ffffff;text-transform:uppercase;letter-spacing:1px;text-align:center;margin:0;">{{brandName}}</p>
-         ${subtitle ? `<p style="font-size:12px;color:rgba(255,255,255,0.6);text-align:center;letter-spacing:3px;text-transform:uppercase;margin:6px 0 0;">${subtitle}</p>` : ""}`,
-        "28px 40px",
+        `<p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:4px;color:#000000;text-align:center;margin:0;">{{brandName}}</p>
+         ${subtitle ? `<p style="font-size:10px;color:#999999;text-align:center;letter-spacing:3px;text-transform:uppercase;margin:5px 0 0;">${subtitle}</p>` : ""}`,
+        "0px 40px 20px",
       ),
     ],
-    values: {
-      backgroundColor: "#000000",
-      padding: "0px",
-      _meta: { htmlID: `${id}-col`, htmlClassNames: "u_column" },
-    },
+    values: { backgroundColor: "#ffffff", padding: "0px", _meta: { htmlID: `${id}-col`, htmlClassNames: "u_column" } },
   }
 }
 
-// Style B — slim light header, brand name left-aligned with a black left border
+// ── Variant 2: Dark (black) background, white logo + white text ───────────────
+function brandHeaderDark(id: string, subtitle = "") {
+  return {
+    id: `${id}-col`,
+    contents: [
+      // Block 1 — Logo white version (delete for text-only)
+      {
+        id: `${id}-logo`,
+        type: "image",
+        values: {
+          containerPadding: "24px 40px 6px",
+          src: { url: "https://placehold.co/160x46/ffffff/000000?text=YOUR+LOGO", width: 160, height: 46 },
+          textAlign: "center",
+          altText: "{{brandName}}",
+          action: { name: "web", values: { href: "", target: "_blank" } },
+          _meta: { htmlID: `${id}-logo`, htmlClassNames: "u_content_image" },
+          ...FLAGS,
+        },
+      },
+      // Block 2 — Text white (delete for logo-only)
+      textBlock(
+        `${id}-text`,
+        `<p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:4px;color:#ffffff;text-align:center;margin:0;">{{brandName}}</p>
+         ${subtitle ? `<p style="font-size:10px;color:rgba(255,255,255,0.5);text-align:center;letter-spacing:3px;text-transform:uppercase;margin:5px 0 0;">${subtitle}</p>` : ""}`,
+        "0px 40px 20px",
+      ),
+    ],
+    values: { backgroundColor: "#000000", padding: "0px", _meta: { htmlID: `${id}-col`, htmlClassNames: "u_column" } },
+  }
+}
+
+// ── Variant 3: Slim left-border, logo left-aligned above left-bar text ────────
 function brandHeaderSlim(id: string, label = "") {
   return {
     id: `${id}-col`,
     contents: [
+      // Block 1 — Logo left-aligned (delete for text-only)
+      {
+        id: `${id}-logo`,
+        type: "image",
+        values: {
+          containerPadding: "20px 40px 8px",
+          src: { url: "https://placehold.co/130x38/1a1a1a/ffffff?text=YOUR+LOGO", width: 130, height: 38 },
+          textAlign: "left",
+          altText: "{{brandName}}",
+          action: { name: "web", values: { href: "", target: "_blank" } },
+          _meta: { htmlID: `${id}-logo`, htmlClassNames: "u_content_image" },
+          ...FLAGS,
+        },
+      },
+      // Block 2 — Left-border text (delete for logo-only)
       textBlock(
         `${id}-text`,
-        `<p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:4px;color:#999999;margin:0 0 4px;">${label || "Newsletter"}</p>
-         <p style="font-size:18px;font-weight:900;color:#000000;text-transform:uppercase;letter-spacing:0.5px;margin:0;border-left:4px solid #000;padding-left:12px;">{{brandName}}</p>`,
-        "24px 40px",
+        `<p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:4px;color:#999999;margin:0 0 4px;">${label || "Newsletter"}</p>
+         <p style="font-size:16px;font-weight:900;color:#000000;text-transform:uppercase;margin:0;border-left:4px solid #000;padding-left:10px;">{{brandName}}</p>`,
+        "0px 40px 20px",
       ),
     ],
     values: { backgroundColor: "#ffffff", padding: "0px", _meta: { htmlID: `${id}-col`, htmlClassNames: "u_column" } },
   }
 }
 
-// Style C — centered minimal brand line, no background
+// ── Variant 4: Minimal centred — logo above dashes-text ──────────────────────
 function brandHeaderMinimal(id: string) {
   return {
     id: `${id}-col`,
     contents: [
+      // Block 1 — Logo centred small (delete for text-only)
+      {
+        id: `${id}-logo`,
+        type: "image",
+        values: {
+          containerPadding: "20px 40px 8px",
+          src: { url: "https://placehold.co/120x34/1a1a1a/ffffff?text=YOUR+LOGO", width: 120, height: 34 },
+          textAlign: "center",
+          altText: "{{brandName}}",
+          action: { name: "web", values: { href: "", target: "_blank" } },
+          _meta: { htmlID: `${id}-logo`, htmlClassNames: "u_content_image" },
+          ...FLAGS,
+        },
+      },
+      // Block 2 — Dash-framed text (delete for logo-only)
       textBlock(
         `${id}-text`,
-        `<p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:5px;color:#000000;text-align:center;margin:0;">— {{brandName}} —</p>`,
-        "20px 40px 16px",
+        `<p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:5px;color:#000000;text-align:center;margin:0;">— {{brandName}} —</p>`,
+        "0px 40px 16px",
       ),
     ],
     values: { backgroundColor: "#ffffff", padding: "0px", _meta: { htmlID: `${id}-col`, htmlClassNames: "u_column" } },
   }
 }
 
-// Style D — brand name inline at top-right as a small label (no row background)
+// ── Variant 5: Inline — logo + text right-aligned, minimal footprint ─────────
 function brandHeaderInline(id: string) {
   return {
     id: `${id}-col`,
     contents: [
+      // Block 1 — Small logo right-aligned (delete for text-only)
+      {
+        id: `${id}-logo`,
+        type: "image",
+        values: {
+          containerPadding: "16px 40px 2px",
+          src: { url: "https://placehold.co/90x26/1a1a1a/ffffff?text=LOGO", width: 90, height: 26 },
+          textAlign: "right",
+          altText: "{{brandName}}",
+          action: { name: "web", values: { href: "", target: "_blank" } },
+          _meta: { htmlID: `${id}-logo`, htmlClassNames: "u_content_image" },
+          ...FLAGS,
+        },
+      },
+      // Block 2 — Small right-aligned text (delete for logo-only)
       textBlock(
         `${id}-text`,
         `<p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:4px;color:#999999;text-align:right;margin:0;">{{brandName}}</p>`,
-        "16px 40px 8px",
+        "0px 40px 8px",
       ),
     ],
     values: { backgroundColor: "#ffffff", padding: "0px", _meta: { htmlID: `${id}-col`, htmlClassNames: "u_column" } },
   }
 }
+
+// Aliases kept for backward compat with templates that previously used the old names
+const brandHeaderLogo     = brandHeader
+const brandHeaderLogoDark = brandHeaderDark
 
 // ── Templates ────────────────────────────────────────────────────────────────
 
