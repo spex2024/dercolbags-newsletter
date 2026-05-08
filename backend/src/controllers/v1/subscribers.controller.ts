@@ -48,3 +48,13 @@ export async function deleteSubscriber(c: Context) {
   await service.deleteSubscriber(id, getAccessibleBrands(authUser));
   return c.json(successResponse(null, "Subscriber deleted successfully"));
 }
+
+export async function anonymiseSubscriber(c: Context) {
+  const authUser = c.get("authUser") as AuthUser;
+  if (authUser.role !== "admin" && authUser.role !== "owner") {
+    return c.json({ success: false, message: "Forbidden" }, 403);
+  }
+  const id = c.req.param("id") ?? "";
+  const result = await service.anonymiseSubscriber(id);
+  return c.json(successResponse(result, "Subscriber data erased"));
+}

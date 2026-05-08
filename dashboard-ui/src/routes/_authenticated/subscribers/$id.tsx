@@ -3,19 +3,30 @@ import { requirePageAccess } from "@/lib/permissions"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { subscribersApi } from "@/services/api/subscribers"
 import { Button } from "@/components/ui/button"
-import { Loader2, ArrowLeft, Mail, Phone, MapPin, Globe, Calendar, Clock, TrendingUp, ShoppingBag } from "lucide-react"
+import { Loader2, ArrowLeft, Mail, Phone, MapPin, Globe, Calendar, Clock, TrendingUp, ShoppingBag, Trash2 } from "lucide-react"
 import { format } from "date-fns"
 import { toast } from "sonner"
+import { useState } from "react"
+import { useSession } from "@/lib/auth"
 
 export const Route = createFileRoute("/_authenticated/subscribers/$id")({
   beforeLoad: ({ context }) => requirePageAccess(context, "subscribers"),
   component: SubscriberDetailPage,
 })
 
+const REASON_LABEL: Record<string, { label: string; style: string }> = {
+  manual:    { label: 'Opted out',     style: 'border-foreground/30 text-muted-foreground' },
+  bounce:    { label: 'Bounced',       style: 'border-destructive/40 bg-destructive/5 text-destructive' },
+  complaint: { label: 'Spam report',   style: 'border-destructive bg-destructive text-white' },
+  admin:     { label: 'Admin removed', style: 'border-foreground/30 text-muted-foreground' },
+}
+
 function SubscriberDetailPage() {
   const { id } = Route.useParams()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const { data: session } = useSession()
+  const [confirmErase, setConfirmErase] = useState(false)
 
   const { data, isLoading } = useQuery({
     queryKey: ["subscriber", id],
@@ -33,6 +44,17 @@ function SubscriberDetailPage() {
     onError: (err: Error) => toast.error(err.message || "Failed to update status"),
   })
 
+  const anonymiseMutation = useMutation({
+    mutationFn: () => subscribersApi.anonymise(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["subscriber", id] })
+      queryClient.invalidateQueries({ queryKey: ["subscribers"] })
+      toast.success("Personal data erased")
+      setConfirmErase(false)
+    },
+    onError: (err: Error) => toast.error(err.message || "Failed to erase data"),
+  })
+
   if (isLoading) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3">
@@ -41,6 +63,9 @@ function SubscriberDetailPage() {
       </div>
     )
   }
+
+  const userRole = (session?.user as any)?.role as string ?? ""
+  const canErase = userRole === "admin" || userRole === "owner"
 
   const subscriber = data?.data
   if (!subscriber) {
@@ -164,6 +189,15 @@ function SubscriberDetailPage() {
             <p className="text-xs text-destructive">
               Unsubscribed on {format(new Date(subscriber.unsubscribedAt), "MMM d, yyyy")}
             </p>
+            {(() => {
+              const reasonKey = subscriber.unsubscribeReason ?? 'manual'
+              const reason = REASON_LABEL[reasonKey] ?? REASON_LABEL['manual']
+              return (
+                <span className={`text-[10px] uppercase tracking-widest font-bold px-2 py-0.5 border ${reason.style}`}>
+                  {reason.label}
+                </span>
+              )
+            })()}
           </div>
         )}
 
@@ -209,6 +243,43 @@ function SubscriberDetailPage() {
             <p className="mt-3 text-[11px] text-muted-foreground">
               This subscriber has been marked as a customer.
             </p>
+          )}
+
+          {canErase && (
+            <div className="mt-6 pt-6 border-t border-foreground/10">
+              <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-bold mb-3">
+                GDPR / Data Removal
+              </p>
+              {subscriber.anonymisedAt ? (
+                <p className="text-xs text-muted-foreground">Data erased on {format(new Date(subscriber.anonymisedAt), "MMM d, yyyy")}</p>
+              ) : !confirmErase ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-destructive/40 text-destructive hover:bg-destructive/5 shadow-sm hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
+                  onClick={() => setConfirmErase(true)}
+                >
+                  <Trash2 className="mr-2 h-3.5 w-3.5" />
+                  Erase Personal Data
+                </Button>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <p className="text-xs text-destructive">This will permanently erase name, phone and location. Confirm?</p>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    disabled={anonymiseMutation.isPending}
+                    onClick={() => anonymiseMutation.mutate()}
+                  >
+                    {anonymiseMutation.isPending ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : null}
+                    Yes, erase
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => setConfirmErase(false)}>
+                    Cancel
+                  </Button>
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>

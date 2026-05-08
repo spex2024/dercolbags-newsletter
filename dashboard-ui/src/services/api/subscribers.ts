@@ -13,6 +13,8 @@ export interface Subscriber {
   isSubscribed: boolean
   unsubscribeToken: string
   unsubscribedAt: string | null
+  unsubscribeReason?: 'manual' | 'bounce' | 'complaint' | 'admin' | null
+  anonymisedAt?: string | null
   lastEmailSentAt: string | null
   createdAt: string
   updatedAt: string
@@ -84,4 +86,7 @@ export const subscribersApi = {
     api.post<{ success: boolean; message: string }>(
       `/api/v1/subscribers/unsubscribe?token=${token}`,
     ),
+
+  anonymise: (id: string) =>
+    api.post<{ success: boolean; message: string }>(`/api/v1/subscribers/${id}/anonymise`),
 }

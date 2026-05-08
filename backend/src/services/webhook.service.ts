@@ -46,8 +46,10 @@ export async function processResendWebhook(payload: ResendWebhookPayload, brand:
 
   if (existingRecipient) {
     await applyWebhookEvent(eventType, existingRecipient.id, payload.data.to);
-  } else if (eventType === "email.bounced" || eventType === "email.complained") {
-    await unsubscribeByEmail(payload.data.to);
+  } else if (eventType === "email.bounced") {
+    await unsubscribeByEmail(payload.data.to, 'bounce');
+  } else if (eventType === "email.complained") {
+    await unsubscribeByEmail(payload.data.to, 'complaint');
   }
 
   return event;
@@ -78,8 +80,10 @@ export async function processMailgunWebhook(payload: MailgunWebhookPayload, bran
 
   if (existingRecipient) {
     await applyWebhookEvent(eventType, existingRecipient.id, payload.recipient ?? "");
-  } else if (eventType === "email.bounced" || eventType === "email.complained") {
-    await unsubscribeByEmail(payload.recipient ?? "");
+  } else if (eventType === "email.bounced") {
+    await unsubscribeByEmail(payload.recipient ?? "", 'bounce');
+  } else if (eventType === "email.complained") {
+    await unsubscribeByEmail(payload.recipient ?? "", 'complaint');
   }
 
   return event;
@@ -96,20 +100,25 @@ async function applyWebhookEvent(eventType: string, recipientId: string, email: 
     await db.update(campaignRecipients)
       .set({ status: "clicked", clickedAt: new Date() })
       .where(eq(campaignRecipients.id, recipientId));
-  } else if (eventType === "email.bounced" || eventType === "email.complained") {
+  } else if (eventType === "email.bounced") {
     await db.update(campaignRecipients)
       .set({ status: "failed", errorMessage: eventType })
       .where(eq(campaignRecipients.id, recipientId));
-    await unsubscribeByEmail(email);
+    await unsubscribeByEmail(email, 'bounce');
+  } else if (eventType === "email.complained") {
+    await db.update(campaignRecipients)
+      .set({ status: "failed", errorMessage: eventType })
+      .where(eq(campaignRecipients.id, recipientId));
+    await unsubscribeByEmail(email, 'complaint');
   }
 }
 
-async function unsubscribeByEmail(email: string) {
+async function unsubscribeByEmail(email: string, reason: 'bounce' | 'complaint') {
   if (!email) return;
   await db.update(subscribers)
-    .set({ isSubscribed: false, unsubscribedAt: new Date() })
+    .set({ isSubscribed: false, unsubscribedAt: new Date(), unsubscribeReason: reason })
     .where(eq(subscribers.email, email.toLowerCase()));
-  console.log(`[Webhook] Auto-unsubscribed ${email} due to bounce/complaint`);
+  console.log(`[Webhook] Auto-unsubscribed ${email} (${reason})`);
 }
 
 export async function recordClick(trackingId: string): Promise<{ url: string } | null> {

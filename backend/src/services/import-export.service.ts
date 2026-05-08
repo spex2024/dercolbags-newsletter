@@ -1,4 +1,4 @@
-import { eq, inArray, count } from "drizzle-orm";
+import { eq, inArray, count, and } from "drizzle-orm";
 import { db } from "../db/client";
 import { importExportJobs, subscribers } from "../db/schema";
 import { AppError } from "../utils/errors";
@@ -37,7 +37,7 @@ export async function createImportJob(
 export async function processImport(
   jobId: string,
   rows: SubscriberRow[]
-): Promise<{ success: number; failed: number; errors: string[] }> {
+): Promise<{ success: number; failed: number; suppressed: number; errors: string[] }> {
   const [job] = await db
     .select()
     .from(importExportJobs)
@@ -48,6 +48,7 @@ export async function processImport(
 
   let success = 0;
   let failed = 0;
+  let suppressed = 0;
   const errors: string[] = [];
 
   await db
@@ -55,10 +56,22 @@ export async function processImport(
     .set({ totalRows: rows.length, status: "processing" })
     .where(eq(importExportJobs.id, jobId));
 
+  const suppressedList = await db
+    .select({ email: subscribers.email })
+    .from(subscribers)
+    .where(and(eq(subscribers.brand, job.brand), eq(subscribers.isSubscribed, false)));
+  const suppressedEmails = new Set(suppressedList.map(s => s.email.toLowerCase()));
+
   for (const row of rows) {
     try {
       if (!row.email || !row.email.includes("@")) {
         throw new Error("Invalid email");
+      }
+
+      if (suppressedEmails.has(row.email.toLowerCase())) {
+        // honour suppression — never re-subscribe an opted-out address
+        suppressed++;
+        continue;
       }
 
       const existing = await db
@@ -96,6 +109,8 @@ export async function processImport(
     }
   }
 
+  console.log(`[Import] Job ${jobId}: success=${success}, failed=${failed}, suppressed=${suppressed}`);
+
   await db
     .update(importExportJobs)
     .set({
@@ -108,7 +123,7 @@ export async function processImport(
     })
     .where(eq(importExportJobs.id, jobId));
 
-  return { success, failed, errors };
+  return { success, failed, suppressed, errors };
 }
 
 export async function createExportJob(

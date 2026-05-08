@@ -74,7 +74,7 @@ export async function unsubscribe(token: string) {
 
   const [updated] = await db
     .update(subscribers)
-    .set({ isSubscribed: false, unsubscribedAt: new Date() })
+    .set({ isSubscribed: false, unsubscribedAt: new Date(), unsubscribeReason: 'manual' })
     .where(eq(subscribers.id, subscriber.id))
     .returning();
 
@@ -185,4 +185,22 @@ export async function deleteSubscriber(id: string, allowedBrands: AllowedBrands)
   }
 
   await db.delete(subscribers).where(eq(subscribers.id, id));
+}
+
+export async function anonymiseSubscriber(id: string) {
+  const [sub] = await db.select().from(subscribers).where(eq(subscribers.id, id)).limit(1);
+  if (!sub) throw new AppError('Subscriber not found', 404);
+  if (!sub.anonymisedAt) {
+    await db.update(subscribers).set({
+      name: null,
+      phone: null,
+      location: null,
+      anonymisedAt: new Date(),
+      isSubscribed: false,
+      unsubscribeReason: 'admin',
+      unsubscribedAt: sub.unsubscribedAt ?? new Date(),
+    }).where(eq(subscribers.id, id));
+  }
+  const [updated] = await db.select().from(subscribers).where(eq(subscribers.id, id)).limit(1);
+  return updated;
 }

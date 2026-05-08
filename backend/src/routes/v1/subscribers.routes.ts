@@ -36,4 +36,6 @@ subscribers.patch(
 
 subscribers.delete("/:id", authMiddleware, controller.deleteSubscriber);
 
+subscribers.post("/:id/anonymise", authMiddleware, controller.anonymiseSubscriber);
+
 export { subscribers };

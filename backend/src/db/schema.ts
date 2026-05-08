@@ -89,6 +89,8 @@ export const subscribers = pgTable(
     isSubscribed: boolean("is_subscribed").notNull().default(true),
     unsubscribeToken: text("unsubscribe_token").notNull().unique(),
     unsubscribedAt: timestamp("unsubscribed_at"),
+    unsubscribeReason: text("unsubscribe_reason"),  // 'manual' | 'bounce' | 'complaint' | 'admin'
+    anonymisedAt: timestamp("anonymised_at"),
     lastEmailSentAt: timestamp("last_email_sent_at"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow().$onUpdateFn(() => new Date()),
