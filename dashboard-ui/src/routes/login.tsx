@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router"
+import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -291,6 +291,12 @@ function LoginPage() {
                     required
                   />
                 </div>
+              </div>
+
+              <div className="text-right">
+                <Link to="/forgot-password" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+                  Forgot password?
+                </Link>
               </div>
 
               <Button type="submit" className="w-full h-12 text-base" disabled={isLoading}>

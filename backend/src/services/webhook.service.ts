@@ -1,6 +1,6 @@
 import { eq, and } from "drizzle-orm";
 import { db } from "../db/client";
-import { webhookEvents, campaignRecipients, trackingLinks, type WebhookEvent } from "../db/schema";
+import { webhookEvents, campaignRecipients, trackingLinks, subscribers, type WebhookEvent } from "../db/schema";
 import { AppError } from "../utils/errors";
 import type { Brand } from "./subscribers.service";
 
@@ -44,15 +44,10 @@ export async function processResendWebhook(payload: ResendWebhookPayload, brand:
     })
     .returning();
 
-  if (existingRecipient && (eventType === "email.opened" || eventType === "email.clicked")) {
-    await db
-      .update(campaignRecipients)
-      .set({
-        status: eventType === "email.opened" ? "opened" : "clicked",
-        ...(eventType === "email.opened" && { openedAt: new Date() }),
-        ...(eventType === "email.clicked" && { clickedAt: new Date() }),
-      })
-      .where(eq(campaignRecipients.id, existingRecipient.id));
+  if (existingRecipient) {
+    await applyWebhookEvent(eventType, existingRecipient.id, payload.data.to);
+  } else if (eventType === "email.bounced" || eventType === "email.complained") {
+    await unsubscribeByEmail(payload.data.to);
   }
 
   return event;
@@ -81,18 +76,40 @@ export async function processMailgunWebhook(payload: MailgunWebhookPayload, bran
     })
     .returning();
 
-  if (existingRecipient && (eventType === "email.opened" || eventType === "email.clicked")) {
-    await db
-      .update(campaignRecipients)
-      .set({
-        status: eventType === "email.opened" ? "opened" : "clicked",
-        ...(eventType === "email.opened" && { openedAt: new Date() }),
-        ...(eventType === "email.clicked" && { clickedAt: new Date() }),
-      })
-      .where(eq(campaignRecipients.id, existingRecipient.id));
+  if (existingRecipient) {
+    await applyWebhookEvent(eventType, existingRecipient.id, payload.recipient ?? "");
+  } else if (eventType === "email.bounced" || eventType === "email.complained") {
+    await unsubscribeByEmail(payload.recipient ?? "");
   }
 
   return event;
+}
+
+// ── Shared helpers ────────────────────────────────────────────────────────────
+
+async function applyWebhookEvent(eventType: string, recipientId: string, email: string) {
+  if (eventType === "email.opened") {
+    await db.update(campaignRecipients)
+      .set({ status: "opened", openedAt: new Date() })
+      .where(eq(campaignRecipients.id, recipientId));
+  } else if (eventType === "email.clicked") {
+    await db.update(campaignRecipients)
+      .set({ status: "clicked", clickedAt: new Date() })
+      .where(eq(campaignRecipients.id, recipientId));
+  } else if (eventType === "email.bounced" || eventType === "email.complained") {
+    await db.update(campaignRecipients)
+      .set({ status: "failed", errorMessage: eventType })
+      .where(eq(campaignRecipients.id, recipientId));
+    await unsubscribeByEmail(email);
+  }
+}
+
+async function unsubscribeByEmail(email: string) {
+  if (!email) return;
+  await db.update(subscribers)
+    .set({ isSubscribed: false, unsubscribedAt: new Date() })
+    .where(eq(subscribers.email, email.toLowerCase()));
+  console.log(`[Webhook] Auto-unsubscribed ${email} due to bounce/complaint`);
 }
 
 export async function recordClick(trackingId: string): Promise<{ url: string } | null> {

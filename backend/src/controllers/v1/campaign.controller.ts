@@ -126,3 +126,23 @@ export async function getCampaignsAnalytics(c: Context) {
   const data = await service.getCampaignsAnalytics(allowedBrands, brand);
   return c.json(successResponse(data));
 }
+
+export async function sendTestEmail(c: Context) {
+  const authUser = c.get("authUser") as AuthUser;
+  requireMarketingRole(authUser);
+  const allowedBrands = getAccessibleBrands(authUser);
+  const id = c.req.param("id");
+
+  await service.sendTestEmail(id, allowedBrands, authUser.email);
+  return c.json(successResponse(null, `Test email sent to ${authUser.email}`));
+}
+
+export async function duplicateCampaign(c: Context) {
+  const authUser = c.get("authUser") as AuthUser;
+  requireMarketingRole(authUser);
+  const allowedBrands = getAccessibleBrands(authUser);
+  const id = c.req.param("id");
+
+  const campaign = await service.duplicateCampaign(id, allowedBrands, authUser.id);
+  return c.json(successResponse(campaign), 201);
+}

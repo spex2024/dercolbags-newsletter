@@ -15,6 +15,27 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
+    sendResetPassword: async ({ user: u, url }) => {
+      // Lazy import to avoid circular dependency
+      const { sendEmail } = await import("../services/email.service");
+      const html = `
+        <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px">
+          <h2 style="font-size:20px;font-weight:700;margin-bottom:8px">Reset your password</h2>
+          <p style="color:#555;margin-bottom:24px">
+            We received a request to reset the password for <strong>${u.email}</strong>.
+            Click the button below to choose a new password.
+          </p>
+          <a href="${url}"
+             style="display:inline-block;background:#1a1a1a;color:#fff;padding:12px 24px;
+                    text-decoration:none;font-weight:700;font-size:14px;letter-spacing:.05em">
+            Reset Password
+          </a>
+          <p style="color:#999;font-size:12px;margin-top:24px">
+            This link expires in 1 hour. If you didn't request a reset, you can safely ignore this email.
+          </p>
+        </div>`;
+      await sendEmail({ brand: "dercolbags", to: u.email, subject: "Reset your password — DercolBags Pulse", html });
+    },
   },
   plugins: [
     admin({

@@ -100,6 +100,12 @@ export const campaignsApi = {
       `/api/v1/campaigns/${id}/cancel`,
     ),
 
+  sendTest: (id: string) =>
+    api.post<{ success: boolean; message: string }>(`/api/v1/campaigns/${id}/test`),
+
+  duplicate: (id: string) =>
+    api.post<{ success: boolean; data: Campaign }>(`/api/v1/campaigns/${id}/duplicate`),
+
   getAnalytics: (brand?: Brand) =>
     api.get<{
       success: boolean

@@ -278,6 +278,39 @@ export async function getCampaignsAnalytics(allowedBrands: AllowedBrands, brand?
   }));
 }
 
+export async function sendTestEmail(id: string, allowedBrands: AllowedBrands, toEmail: string) {
+  const campaign = await getCampaignById(id, allowedBrands);
+  const { sendEmail } = await import("./email.service");
+
+  await sendEmail({
+    brand:   campaign.brand,
+    to:      toEmail,
+    subject: `[TEST] ${campaign.subject}`,
+    html:    campaign.content,
+  });
+}
+
+export async function duplicateCampaign(id: string, allowedBrands: AllowedBrands, userId: string) {
+  const original = await getCampaignById(id, allowedBrands);
+
+  const [copy] = await db
+    .insert(campaigns)
+    .values({
+      name:       `Copy of ${original.name}`,
+      brand:      original.brand,
+      subject:    original.subject,
+      content:    original.content,
+      preheader:  original.preheader ?? undefined,
+      status:     "draft",
+      targetType: original.targetType,
+      targetId:   original.targetId ?? undefined,
+      createdBy:  userId,
+    })
+    .returning();
+
+  return copy;
+}
+
 async function getCampaignRecipients(campaign: Campaign): Promise<string[]> {
   if (campaign.targetType === "all") {
     const result = await db

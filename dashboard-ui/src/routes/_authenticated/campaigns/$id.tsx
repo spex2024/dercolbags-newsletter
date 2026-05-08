@@ -21,6 +21,8 @@ import {
   Users,
   MailOpen,
   MousePointerClick,
+  FlaskConical,
+  Copy,
 } from "lucide-react"
 import { format } from "date-fns"
 import { toast } from "sonner"
@@ -129,6 +131,22 @@ function CampaignDetailPage() {
       toast.error(err.message || "Failed to delete campaign")
       setConfirmAction(null)
     },
+  })
+
+  const testMutation = useMutation({
+    mutationFn: () => campaignsApi.sendTest(id),
+    onSuccess: () => toast.success("Test email sent to your inbox"),
+    onError: (err: Error) => toast.error(err.message || "Failed to send test email"),
+  })
+
+  const duplicateMutation = useMutation({
+    mutationFn: () => campaignsApi.duplicate(id),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: ["campaigns"] })
+      toast.success("Campaign duplicated")
+      navigate({ to: "/campaigns/$id", params: { id: res.data.id } })
+    },
+    onError: (err: Error) => toast.error(err.message || "Failed to duplicate campaign"),
   })
 
   const updateMutation = useMutation({
@@ -336,7 +354,35 @@ function CampaignDetailPage() {
           Campaigns
         </button>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Test email — available on all statuses */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => testMutation.mutate()}
+            disabled={testMutation.isPending}
+            className="shadow-sm hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
+          >
+            {testMutation.isPending
+              ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+              : <FlaskConical className="mr-2 h-3.5 w-3.5" />}
+            Test
+          </Button>
+
+          {/* Duplicate — available on all statuses */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => duplicateMutation.mutate()}
+            disabled={duplicateMutation.isPending}
+            className="shadow-sm hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
+          >
+            {duplicateMutation.isPending
+              ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+              : <Copy className="mr-2 h-3.5 w-3.5" />}
+            Duplicate
+          </Button>
+
           {isDraft && (
             <>
               <Button
