@@ -100,8 +100,8 @@ export const campaignsApi = {
       `/api/v1/campaigns/${id}/cancel`,
     ),
 
-  sendTest: (id: string) =>
-    api.post<{ success: boolean; message: string }>(`/api/v1/campaigns/${id}/test`),
+  sendTest: (id: string, email?: string) =>
+    api.post<{ success: boolean; message: string }>(`/api/v1/campaigns/${id}/test`, email ? { email } : {}),
 
   duplicate: (id: string) =>
     api.post<{ success: boolean; data: Campaign }>(`/api/v1/campaigns/${id}/duplicate`),

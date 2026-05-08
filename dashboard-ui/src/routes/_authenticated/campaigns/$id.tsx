@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { requirePageAccess } from "@/lib/permissions"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
@@ -79,6 +79,9 @@ function CampaignDetailPage() {
     content: string
   } | null>(null)
   const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null)
+  const [showTestInput, setShowTestInput] = useState(false)
+  const [testEmail, setTestEmail] = useState("")
+  const testInputRef = useRef<HTMLInputElement>(null)
 
   const { data, isLoading } = useQuery({
     queryKey: ["campaign", id],
@@ -134,8 +137,12 @@ function CampaignDetailPage() {
   })
 
   const testMutation = useMutation({
-    mutationFn: () => campaignsApi.sendTest(id),
-    onSuccess: () => toast.success("Test email sent to your inbox"),
+    mutationFn: (email: string) => campaignsApi.sendTest(id, email || undefined),
+    onSuccess: (_, email) => {
+      toast.success(`Test email sent to ${email || "your inbox"}`)
+      setShowTestInput(false)
+      setTestEmail("")
+    },
     onError: (err: Error) => toast.error(err.message || "Failed to send test email"),
   })
 
@@ -356,18 +363,53 @@ function CampaignDetailPage() {
 
         <div className="flex items-center gap-2 flex-wrap">
           {/* Test email — available on all statuses */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => testMutation.mutate()}
-            disabled={testMutation.isPending}
-            className="shadow-sm hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
-          >
-            {testMutation.isPending
-              ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-              : <FlaskConical className="mr-2 h-3.5 w-3.5" />}
-            Test
-          </Button>
+          {showTestInput ? (
+            <div className="flex items-center gap-1 border-2 border-foreground pl-2">
+              <Input
+                ref={testInputRef}
+                type="email"
+                value={testEmail}
+                onChange={(e) => setTestEmail(e.target.value)}
+                placeholder="email@example.com"
+                className="h-7 w-48 border-0 text-xs px-1 shadow-none focus-visible:ring-0"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") testMutation.mutate(testEmail)
+                  if (e.key === "Escape") { setShowTestInput(false); setTestEmail("") }
+                }}
+                autoFocus
+              />
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-7 px-2 rounded-none border-l-2 border-foreground hover:bg-foreground hover:text-background"
+                disabled={testMutation.isPending}
+                onClick={() => testMutation.mutate(testEmail)}
+              >
+                {testMutation.isPending
+                  ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  : <Send className="h-3.5 w-3.5" />}
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-7 px-2 rounded-none hover:bg-muted"
+                onClick={() => { setShowTestInput(false); setTestEmail("") }}
+              >
+                <X className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowTestInput(true)}
+              disabled={testMutation.isPending}
+              className="shadow-sm hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
+            >
+              <FlaskConical className="mr-2 h-3.5 w-3.5" />
+              Test
+            </Button>
+          )}
 
           {/* Duplicate — available on all statuses */}
           <Button

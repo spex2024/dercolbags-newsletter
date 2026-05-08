@@ -61,12 +61,21 @@ async function sendViaResend(params: SendEmailParams): Promise<void> {
 }
 
 async function sendViaMailgun(params: SendEmailParams): Promise<void> {
-  await mailgunClient.messages.create(env.MAILGUN_DOMAIN, {
-    from: SENDER_CONFIG.dercolbags.from,
-    to: [params.to],
-    subject: params.subject,
-    html: params.html,
-  });
+  try {
+    const result = await mailgunClient.messages.create(env.MAILGUN_DOMAIN, {
+      from: SENDER_CONFIG.dercolbags.from,
+      to: [params.to],
+      subject: params.subject,
+      html: params.html,
+    });
+    console.log(`[Mailgun] Queued to ${params.to}: ${result.id}`);
+  } catch (err: unknown) {
+    const detail = (err as { details?: string; message?: string })?.details
+      ?? (err as { message?: string })?.message
+      ?? String(err);
+    console.error(`[Mailgun] Error sending to ${params.to}:`, detail);
+    throw new Error(`Mailgun: ${detail}`);
+  }
 }
 
 export async function sendEmail(params: SendEmailParams): Promise<void> {

@@ -133,8 +133,11 @@ export async function sendTestEmail(c: Context) {
   const allowedBrands = getAccessibleBrands(authUser);
   const id = c.req.param("id");
 
-  await service.sendTestEmail(id, allowedBrands, authUser.email);
-  return c.json(successResponse(null, `Test email sent to ${authUser.email}`));
+  const body = await c.req.json().catch(() => ({}));
+  const toEmail: string = body?.email?.trim() || authUser.email;
+
+  await service.sendTestEmail(id, allowedBrands, toEmail);
+  return c.json(successResponse(null, `Test email sent to ${toEmail}`));
 }
 
 export async function duplicateCampaign(c: Context) {

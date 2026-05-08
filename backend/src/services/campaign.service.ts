@@ -280,14 +280,27 @@ export async function getCampaignsAnalytics(allowedBrands: AllowedBrands, brand?
 
 export async function sendTestEmail(id: string, allowedBrands: AllowedBrands, toEmail: string) {
   const campaign = await getCampaignById(id, allowedBrands);
+
+  if (!campaign.content || campaign.content.trim().length === 0) {
+    throw new AppError("Campaign has no content. Open the campaign editor and save your design first.", 400);
+  }
+
   const { sendEmail } = await import("./email.service");
 
-  await sendEmail({
-    brand:   campaign.brand,
-    to:      toEmail,
-    subject: `[TEST] ${campaign.subject}`,
-    html:    campaign.content,
-  });
+  console.log(`[TestEmail] Sending test for campaign "${campaign.name}" (${campaign.brand}) to ${toEmail}`);
+
+  try {
+    await sendEmail({
+      brand:   campaign.brand,
+      to:      toEmail,
+      subject: `[TEST] ${campaign.subject}`,
+      html:    campaign.content,
+    });
+    console.log(`[TestEmail] Sent successfully to ${toEmail}`);
+  } catch (err) {
+    console.error(`[TestEmail] Failed to send to ${toEmail}:`, err);
+    throw new AppError(`Failed to send test email: ${(err as Error).message}`, 500);
+  }
 }
 
 export async function duplicateCampaign(id: string, allowedBrands: AllowedBrands, userId: string) {
