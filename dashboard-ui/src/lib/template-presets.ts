@@ -124,6 +124,82 @@ function footer(id: string) {
   )
 }
 
+// ── Logo header helpers ──────────────────────────────────────────────────────
+
+// Logo image block (replace src to use a real logo)
+function logoImg(id: string) {
+  return {
+    id,
+    type: "image",
+    values: {
+      containerPadding: "24px 40px",
+      src: {
+        url: "https://placehold.co/180x52/000000/ffffff?text=YOUR+LOGO",
+        width: 180,
+        height: 52,
+      },
+      textAlign: "center",
+      altText: "{{brandName}}",
+      action: { name: "web", values: { href: "", target: "_blank" } },
+      _meta: { htmlID: id, htmlClassNames: "u_content_image" },
+      ...FLAGS,
+    },
+  }
+}
+
+// Style E — centred logo on white, clean and minimal
+function brandHeaderLogo(id: string) {
+  return {
+    id: `${id}-col`,
+    contents: [ logoImg(`${id}-img`) ],
+    values: {
+      backgroundColor: "#ffffff",
+      padding: "0px",
+      _meta: { htmlID: `${id}-col`, htmlClassNames: "u_column" },
+    },
+  }
+}
+
+// Style F — logo on inverted black background
+function brandHeaderLogoDark(id: string, subtitle = "") {
+  return {
+    id: `${id}-col`,
+    contents: [
+      {
+        id: `${id}-img`,
+        type: "image",
+        values: {
+          containerPadding: subtitle ? "24px 40px 10px" : "24px 40px",
+          src: {
+            url: "https://placehold.co/180x52/ffffff/000000?text=YOUR+LOGO",
+            width: 180,
+            height: 52,
+          },
+          textAlign: "center",
+          altText: "{{brandName}}",
+          action: { name: "web", values: { href: "", target: "_blank" } },
+          _meta: { htmlID: `${id}-img`, htmlClassNames: "u_content_image" },
+          ...FLAGS,
+        },
+      },
+      ...(subtitle
+        ? [textBlock(
+            `${id}-sub`,
+            `<p style="font-size:11px;color:rgba(255,255,255,0.55);text-align:center;letter-spacing:4px;text-transform:uppercase;margin:0;">${subtitle}</p>`,
+            "0px 40px 20px",
+          )]
+        : []),
+    ],
+    values: {
+      backgroundColor: "#000000",
+      padding: "0px",
+      _meta: { htmlID: `${id}-col`, htmlClassNames: "u_column" },
+    },
+  }
+}
+
+// ── Text header helpers ──────────────────────────────────────────────────────
+
 // Style A — inverted black full-width header (most templates)
 function brandHeader(id: string, subtitle = "") {
   return {
@@ -231,7 +307,7 @@ export const presetTemplates: PresetTemplate[] = [
       counters: { u_row: 4, u_column: 4, u_content_text: 4, u_content_button: 1, u_content_divider: 1 },
       body: {
         rows: [
-          row("r-w-header", [brandHeader("w-hdr", "Welcome")], "0px"),
+          row("r-w-header", [brandHeaderLogo("w-hdr")], "0px"),
           row("r-w-hero", [col("c-w-hero", [
             textBlock("t-w-hero",
               `<p style="font-size:36px;font-weight:900;color:#000000;text-transform:uppercase;letter-spacing:-1px;text-align:center;line-height:110%;margin:0;">Welcome to the family, {{name}}.</p>`,
@@ -308,7 +384,7 @@ export const presetTemplates: PresetTemplate[] = [
       counters: { u_row: 4, u_column: 4, u_content_text: 5, u_content_button: 1, u_content_divider: 1 },
       body: {
         rows: [
-          row("r-fs-header", [brandHeader("fs-hdr")], "0px"),
+          row("r-fs-header", [brandHeaderLogoDark("fs-hdr")], "0px"),
           row("r-fs-hero", [col("c-fs-hero", [
             textBlock("t-fs-badge",
               `<p style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:4px;color:#ffffff;background:#000000;display:inline-block;padding:6px 16px;text-align:center;margin:0;">Limited Time Only</p>`,
@@ -344,7 +420,7 @@ export const presetTemplates: PresetTemplate[] = [
       counters: { u_row: 5, u_column: 5, u_content_text: 5, u_content_button: 1, u_content_image: 1, u_content_divider: 1 },
       body: {
         rows: [
-          row("r-pl-header", [brandHeader("pl-hdr", "New Arrival")], "0px"),
+          row("r-pl-header", [brandHeaderLogoDark("pl-hdr", "New Arrival")], "0px"),
           row("r-pl-img", [{
             id: "c-pl-img",
             contents: [{
@@ -432,7 +508,7 @@ export const presetTemplates: PresetTemplate[] = [
       counters: { u_row: 5, u_column: 5, u_content_text: 6, u_content_button: 1, u_content_divider: 2 },
       body: {
         rows: [
-          row("r-ev-header", [brandHeaderSlim("ev-hdr", "You're Invited")], "0px"),
+          row("r-ev-header", [brandHeaderLogo("ev-hdr")], "0px"),
           row("r-ev-hero", [col("c-ev-hero", [
             textBlock("t-ev-label",
               `<p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:4px;color:#999999;text-align:center;margin:0;">Special Event</p>`,
@@ -476,7 +552,7 @@ export const presetTemplates: PresetTemplate[] = [
       counters: { u_row: 4, u_column: 4, u_content_text: 4, u_content_button: 1, u_content_divider: 1 },
       body: {
         rows: [
-          row("r-ty-header", [brandHeader("ty-hdr")], "0px"),
+          row("r-ty-header", [brandHeaderLogo("ty-hdr")], "0px"),
           row("r-ty-hero", [col("c-ty-hero", [
             textBlock("t-ty-emoji",
               `<p style="font-size:48px;text-align:center;margin:0;">🙏</p>`,
@@ -539,7 +615,7 @@ export const presetTemplates: PresetTemplate[] = [
       counters: { u_row: 5, u_column: 5, u_content_text: 5, u_content_button: 2, u_content_divider: 1 },
       body: {
         rows: [
-          row("r-ac-header", [brandHeader("ac-hdr")], "0px"),
+          row("r-ac-header", [brandHeaderLogo("ac-hdr")], "0px"),
           row("r-ac-hero", [col("c-ac-hero", [
             textBlock("t-ac-icon",
               `<p style="font-size:40px;text-align:center;margin:0;">🛒</p>`,
@@ -584,7 +660,7 @@ export const presetTemplates: PresetTemplate[] = [
       counters: { u_row: 5, u_column: 5, u_content_text: 5, u_content_button: 1, u_content_divider: 2 },
       body: {
         rows: [
-          row("r-lr-header", [brandHeader("lr-hdr", "Loyalty Programme")], "0px"),
+          row("r-lr-header", [brandHeaderLogoDark("lr-hdr", "Loyalty Programme")], "0px"),
           row("r-lr-hero", [col("c-lr-hero", [
             textBlock("t-lr-congrats",
               `<p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:4px;color:#B8860B;text-align:center;margin:0;">🏆 Congratulations</p>`,
@@ -626,7 +702,7 @@ export const presetTemplates: PresetTemplate[] = [
       counters: { u_row: 4, u_column: 4, u_content_text: 4, u_content_button: 1, u_content_divider: 1 },
       body: {
         rows: [
-          row("r-fb-header", [brandHeader("fb-hdr")], "0px"),
+          row("r-fb-header", [brandHeaderLogo("fb-hdr")], "0px"),
           row("r-fb-hero", [col("c-fb-hero", [
             textBlock("t-fb-icon",
               `<p style="font-size:40px;text-align:center;margin:0;">💬</p>`,
@@ -827,7 +903,7 @@ export const presetTemplates: PresetTemplate[] = [
       counters: { u_row: 4, u_column: 4, u_content_text: 4, u_content_button: 1, u_content_divider: 1 },
       body: {
         rows: [
-          row("r-bs-header", [brandHeader("bs-hdr")], "0px"),
+          row("r-bs-header", [brandHeaderLogo("bs-hdr")], "0px"),
           row("r-bs-hero", [col("c-bs-hero", [
             textBlock("t-bs-badge",
               `<p style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:4px;color:#ffffff;background:#16a34a;display:inline-block;padding:6px 16px;text-align:center;margin:0;">Back in Stock</p>`,
@@ -961,7 +1037,7 @@ export const presetTemplates: PresetTemplate[] = [
       counters: { u_row: 5, u_column: 5, u_content_text: 5, u_content_button: 1, u_content_divider: 2 },
       body: {
         rows: [
-          row("r-ba-header", [brandHeader("ba-hdr")], "0px"),
+          row("r-ba-header", [brandHeaderLogoDark("ba-hdr")], "0px"),
           row("r-ba-hero", [col("c-ba-hero", [
             textBlock("t-ba-emoji",
               `<p style="font-size:52px;text-align:center;margin:0;">🎂</p>`,
