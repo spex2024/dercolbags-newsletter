@@ -129,6 +129,21 @@ export const campaignsApi = {
       }>
     }>(`/api/v1/campaigns/analytics${brand ? `?brand=${brand}` : ""}`),
 
+  getRecipients: (id: string, status?: string) =>
+    api.get<{
+      success: boolean
+      data: Array<{
+        id: string
+        status: "pending" | "sent" | "failed" | "opened" | "clicked"
+        sentAt: string | null
+        openedAt: string | null
+        clickedAt: string | null
+        errorMessage: string | null
+        name: string | null
+        email: string
+      }>
+    }>(`/api/v1/campaigns/${id}/recipients${status && status !== "all" ? `?status=${status}` : ""}`),
+
   getStats: (id: string) =>
     api.get<{
       success: boolean

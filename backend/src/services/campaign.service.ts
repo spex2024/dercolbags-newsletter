@@ -280,6 +280,39 @@ export async function getCampaignsAnalytics(allowedBrands: AllowedBrands, brand?
   }));
 }
 
+export async function getCampaignRecipientsList(
+  id: string,
+  allowedBrands: AllowedBrands,
+  statusFilter?: string,
+) {
+  await getCampaignById(id, allowedBrands);
+
+  const rows = await db
+    .select({
+      id:           campaignRecipients.id,
+      status:       campaignRecipients.status,
+      sentAt:       campaignRecipients.sentAt,
+      openedAt:     campaignRecipients.openedAt,
+      clickedAt:    campaignRecipients.clickedAt,
+      errorMessage: campaignRecipients.errorMessage,
+      name:         subscribers.name,
+      email:        subscribers.email,
+    })
+    .from(campaignRecipients)
+    .innerJoin(subscribers, eq(campaignRecipients.subscriberId, subscribers.id))
+    .where(
+      statusFilter && statusFilter !== "all"
+        ? and(
+            eq(campaignRecipients.campaignId, id),
+            eq(campaignRecipients.status, statusFilter as "pending" | "sent" | "failed" | "opened" | "clicked"),
+          )
+        : eq(campaignRecipients.campaignId, id),
+    )
+    .orderBy(campaignRecipients.updatedAt);
+
+  return rows;
+}
+
 export async function sendTestEmail(id: string, allowedBrands: AllowedBrands, toEmail: string) {
   const campaign = await getCampaignById(id, allowedBrands);
 

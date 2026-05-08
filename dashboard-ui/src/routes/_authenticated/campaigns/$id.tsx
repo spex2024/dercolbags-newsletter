@@ -17,6 +17,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import {
   ArrowLeft,
   Calendar,
   Target,
@@ -34,6 +42,7 @@ import {
   Copy,
   FileText,
   LayoutTemplate,
+  AlertCircle,
 } from "lucide-react"
 import { format } from "date-fns"
 import { toast } from "sonner"
@@ -95,6 +104,7 @@ function CampaignDetailPage() {
   const [testEmail, setTestEmail] = useState("")
   const [editorReady, setEditorReady] = useState(false)
   const [showTemplatePicker, setShowTemplatePicker] = useState(false)
+  const [recipientStatus, setRecipientStatus] = useState<string>("all")
   const [pickerSelected, setPickerSelected] = useState<{ label: string; design: Record<string, unknown> } | null>(null)
   const testInputRef = useRef<HTMLInputElement>(null)
   const emailBuilderRef = useRef<EmailBuilderRef>(null)
@@ -114,6 +124,13 @@ function CampaignDetailPage() {
     queryKey: ["campaign-stats", id],
     queryFn: () => campaignsApi.getStats(id),
     enabled: !!data?.data && ["sent", "sending", "scheduled"].includes(data.data.status),
+    refetchInterval: data?.data?.status === "sending" ? 10_000 : false,
+  })
+
+  const { data: recipientsData, isLoading: recipientsLoading } = useQuery({
+    queryKey: ["campaign-recipients", id, recipientStatus],
+    queryFn: () => campaignsApi.getRecipients(id, recipientStatus),
+    enabled: !!data?.data && ["sent", "sending", "failed"].includes(data.data.status),
     refetchInterval: data?.data?.status === "sending" ? 10_000 : false,
   })
 
@@ -814,6 +831,107 @@ function CampaignDetailPage() {
           </div>
         )}
       </div>
+
+      {/* Recipients breakdown — sent / sending campaigns only */}
+      {recipientsData && (
+        <div className="border-2 border-foreground shadow-[4px_4px_0px_0px_oklch(0.1_0_0)]">
+
+          {/* Section header with filter tabs */}
+          <div className="bg-foreground text-background px-6 py-3 flex items-center justify-between border-b-2 border-foreground">
+            <div className="flex items-center gap-2">
+              <Users className="h-3.5 w-3.5" />
+              <p className="text-[10px] uppercase tracking-[0.2em] font-bold">Recipients</p>
+            </div>
+            <div className="flex items-center gap-1">
+              {(["all", "sent", "opened", "clicked", "failed", "pending"] as const).map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setRecipientStatus(s)}
+                  className={`text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 transition-colors ${
+                    recipientStatus === s
+                      ? "bg-background text-foreground"
+                      : "text-background/60 hover:text-background"
+                  }`}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/20 hover:bg-muted/20 border-b-2 border-foreground">
+                <TableHead className="text-[10px] uppercase tracking-[0.15em] font-bold py-3 h-auto">Subscriber</TableHead>
+                <TableHead className="text-[10px] uppercase tracking-[0.15em] font-bold py-3 h-auto">Status</TableHead>
+                <TableHead className="hidden sm:table-cell text-[10px] uppercase tracking-[0.15em] font-bold py-3 h-auto">Sent</TableHead>
+                <TableHead className="hidden md:table-cell text-[10px] uppercase tracking-[0.15em] font-bold py-3 h-auto">Opened</TableHead>
+                <TableHead className="hidden md:table-cell text-[10px] uppercase tracking-[0.15em] font-bold py-3 h-auto">Clicked</TableHead>
+                <TableHead className="text-[10px] uppercase tracking-[0.15em] font-bold py-3 h-auto">Note</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {recipientsLoading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <TableRow key={i}>
+                    {Array.from({ length: 6 }).map((__, j) => (
+                      <TableCell key={j}><div className="h-4 w-24 bg-muted animate-pulse" /></TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : !recipientsData.data?.length ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="py-10 text-center text-sm text-muted-foreground">
+                    No recipients match this filter
+                  </TableCell>
+                </TableRow>
+              ) : (
+                recipientsData.data.map((r) => {
+                  const STATUS_BADGE: Record<string, string> = {
+                    pending: "border-foreground/20 bg-foreground/5 text-foreground",
+                    sent:    "border-foreground/40 text-foreground",
+                    opened:  "border-emerald-600 bg-emerald-50 text-emerald-700",
+                    clicked: "border-blue-600 bg-blue-50 text-blue-700",
+                    failed:  "border-destructive/40 bg-destructive/5 text-destructive",
+                  }
+                  return (
+                    <TableRow key={r.id} className="hover:bg-muted/20 transition-colors">
+                      <TableCell>
+                        <p className="text-sm font-semibold">{r.name || "—"}</p>
+                        <p className="text-[11px] text-muted-foreground">{r.email}</p>
+                      </TableCell>
+                      <TableCell>
+                        <span className={`text-[10px] uppercase tracking-widest font-bold px-2 py-0.5 border ${STATUS_BADGE[r.status] ?? STATUS_BADGE.pending}`}>
+                          {r.status}
+                        </span>
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell text-[11px] text-muted-foreground tabular-nums">
+                        {r.sentAt ? format(new Date(r.sentAt), "MMM d, h:mm a") : "—"}
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell text-[11px] text-muted-foreground tabular-nums">
+                        {r.openedAt ? format(new Date(r.openedAt), "MMM d, h:mm a") : "—"}
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell text-[11px] text-muted-foreground tabular-nums">
+                        {r.clickedAt ? format(new Date(r.clickedAt), "MMM d, h:mm a") : "—"}
+                      </TableCell>
+                      <TableCell>
+                        {r.errorMessage ? (
+                          <div className="flex items-start gap-1.5 max-w-[200px]">
+                            <AlertCircle className="h-3.5 w-3.5 text-destructive shrink-0 mt-0.5" />
+                            <p className="text-[11px] text-destructive leading-snug">{r.errorMessage}</p>
+                          </div>
+                        ) : (
+                          <span className="text-[11px] text-muted-foreground">—</span>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  )
+                })
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      )}
     </div>
   )
 }

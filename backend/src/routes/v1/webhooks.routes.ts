@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { errorResponse, successResponse } from "../../utils/response";
+import { recordOpen, recordClick } from "../../services/tracking.service";
 
 const webhooks = new Hono();
 
@@ -23,13 +24,19 @@ webhooks.post("/mailgun", async (c) => {
 
 const tracking = new Hono();
 
+const PIXEL = Buffer.from(
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+  "base64"
+);
+
 tracking.get("/open/:recipientId", async (c) => {
-  const pixel = Buffer.from(
-    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
-    "base64"
+  const { recipientId } = c.req.param();
+  // fire-and-forget — don't block the image response
+  recordOpen(recipientId).catch((err) =>
+    console.error("[Tracking] recordOpen failed:", err)
   );
 
-  return c.body(pixel, {
+  return c.body(PIXEL, {
     headers: {
       "Content-Type": "image/png",
       "Cache-Control": "no-store, no-cache, must-revalidate",
@@ -38,7 +45,13 @@ tracking.get("/open/:recipientId", async (c) => {
 });
 
 tracking.get("/click/:trackingId", async (c) => {
-  return c.redirect("/");
+  const { trackingId } = c.req.param();
+  const result = await recordClick(trackingId).catch((err) => {
+    console.error("[Tracking] recordClick failed:", err);
+    return null;
+  });
+
+  return c.redirect(result?.url ?? "/");
 });
 
 export { webhooks, tracking };

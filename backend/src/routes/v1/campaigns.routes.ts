@@ -20,6 +20,7 @@ campaigns.post("/:id/schedule", validate(scheduleCampaignSchema), controller.sch
 campaigns.post("/:id/cancel", controller.cancelCampaign);
 
 campaigns.get("/:id/stats",        controller.getCampaignStats);
+campaigns.get("/:id/recipients",   controller.getCampaignRecipientsList);
 campaigns.post("/:id/test",        controller.sendTestEmail);
 campaigns.post("/:id/duplicate",   controller.duplicateCampaign);
 

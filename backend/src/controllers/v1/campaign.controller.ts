@@ -109,6 +109,16 @@ export async function cancelCampaign(c: Context) {
   return c.json(successResponse(campaign));
 }
 
+export async function getCampaignRecipientsList(c: Context) {
+  const authUser = c.get("authUser") as AuthUser;
+  const allowedBrands = getAccessibleBrands(authUser);
+  const id = c.req.param("id");
+  const status = c.req.query("status");
+
+  const data = await service.getCampaignRecipientsList(id, allowedBrands, status);
+  return c.json(successResponse(data));
+}
+
 export async function getCampaignStats(c: Context) {
   const authUser = c.get("authUser") as AuthUser;
   const allowedBrands = getAccessibleBrands(authUser);
