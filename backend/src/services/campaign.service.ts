@@ -285,7 +285,18 @@ export async function sendTestEmail(id: string, allowedBrands: AllowedBrands, to
     throw new AppError("Campaign has no content. Open the campaign editor and save your design first.", 400);
   }
 
-  const { sendEmail } = await import("./email.service");
+  const { sendEmail, replaceCampaignVariables } = await import("./email.service");
+  const { env } = await import("../config/env");
+
+  const brandName = campaign.brand === "watpak" ? "WatPak" : "DercolBags";
+  const testUnsubscribeUrl = `${env.FRONTEND_URL}/unsubscribe?token=test-preview`;
+
+  const html = replaceCampaignVariables(campaign.content, {
+    brandName,
+    unsubscribeUrl: testUnsubscribeUrl,
+    subject:   campaign.subject,
+    preheader: campaign.preheader ?? undefined,
+  });
 
   console.log(`[TestEmail] Sending test for campaign "${campaign.name}" (${campaign.brand}) to ${toEmail}`);
 
@@ -294,7 +305,7 @@ export async function sendTestEmail(id: string, allowedBrands: AllowedBrands, to
       brand:   campaign.brand,
       to:      toEmail,
       subject: `[TEST] ${campaign.subject}`,
-      html:    campaign.content,
+      html,
     });
     console.log(`[TestEmail] Sent successfully to ${toEmail}`);
   } catch (err) {

@@ -184,6 +184,19 @@ export async function sendSubscriptionConfirmation(
     .where(eq(subscribers.id, params.subscriberId));
 }
 
+export function replaceCampaignVariables(
+  html: string,
+  vars: { brandName: string; unsubscribeUrl: string; subject?: string; preheader?: string },
+): string {
+  return html
+    .replace(/\{\{brandName\}\}/gi,      vars.brandName)
+    .replace(/\{\{brand_name\}\}/gi,     vars.brandName)
+    .replace(/\{\{unsubscribeUrl\}\}/gi, vars.unsubscribeUrl)
+    .replace(/\{\{unsubscribe_url\}\}/gi,vars.unsubscribeUrl)
+    .replace(/\{\{subject\}\}/gi,        vars.subject   ?? "")
+    .replace(/\{\{preheader\}\}/gi,      vars.preheader ?? "");
+}
+
 export async function sendCampaignEmail(params: SendCampaignParams) {
   const [subscriber] = await db
     .select({ unsubscribeToken: subscribers.unsubscribeToken })
@@ -196,13 +209,20 @@ export async function sendCampaignEmail(params: SendCampaignParams) {
   const brandColor = buildBrandColor(params.brand);
   const unsubscribeLink = buildUnsubscribeLink(unsubscribeToken);
 
+  const processedContent = replaceCampaignVariables(params.html, {
+    brandName,
+    unsubscribeUrl: unsubscribeLink,
+    subject:   params.subject,
+    preheader: params.preheader,
+  });
+
   const html = buildCampaignEmailHtml({
     brand: params.brand,
     brandName,
     brandColor,
     subject: params.subject,
     preheader: params.preheader,
-    content: params.html,
+    content: processedContent,
     unsubscribeLink,
   });
 
