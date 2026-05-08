@@ -29,7 +29,14 @@ function ImportExportPage() {
   const importMutation = useMutation({
     mutationFn: () => importExportApi.importSubscribers(currentBrand, importFile!, { skipDuplicates }),
     onSuccess: (result) => {
-      toast.success(`Import started: ${result.data.fileName}`)
+      const { success, failed, suppressed } = result.data as {
+        success?: number; failed?: number; suppressed?: number; fileName?: string
+      }
+      const parts: string[] = []
+      if (success)     parts.push(`${success} imported`)
+      if (suppressed)  parts.push(`${suppressed} suppressed (unsubscribed)`)
+      if (failed)      parts.push(`${failed} failed`)
+      toast.success(parts.length ? parts.join(" · ") : "Import complete")
       setImportFile(null)
     },
     onError: (err: Error) => toast.error(err.message || "Import failed"),
