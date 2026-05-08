@@ -363,53 +363,62 @@ function CampaignDetailPage() {
 
         <div className="flex items-center gap-2 flex-wrap">
           {/* Test email — available on all statuses */}
-          {showTestInput ? (
-            <div className="flex items-center gap-1 border-2 border-foreground pl-2">
-              <Input
-                ref={testInputRef}
-                type="email"
-                value={testEmail}
-                onChange={(e) => setTestEmail(e.target.value)}
-                placeholder="email@example.com"
-                className="h-7 w-48 border-0 text-xs px-1 shadow-none focus-visible:ring-0"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") testMutation.mutate(testEmail)
-                  if (e.key === "Escape") { setShowTestInput(false); setTestEmail("") }
-                }}
-                autoFocus
-              />
-              <Button
-                size="sm"
-                variant="ghost"
-                className="h-7 px-2 rounded-none border-l-2 border-foreground hover:bg-foreground hover:text-background"
-                disabled={testMutation.isPending}
-                onClick={() => testMutation.mutate(testEmail)}
-              >
-                {testMutation.isPending
-                  ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  : <Send className="h-3.5 w-3.5" />}
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="h-7 px-2 rounded-none hover:bg-muted"
-                onClick={() => { setShowTestInput(false); setTestEmail("") }}
-              >
-                <X className="h-3.5 w-3.5" />
-              </Button>
-            </div>
-          ) : (
+          <div className="relative">
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setShowTestInput(true)}
+              onClick={() => setShowTestInput((v) => !v)}
               disabled={testMutation.isPending}
-              className="shadow-sm hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
+              className={`shadow-sm hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all ${showTestInput ? "border-foreground bg-foreground text-background" : ""}`}
             >
               <FlaskConical className="mr-2 h-3.5 w-3.5" />
               Test
             </Button>
-          )}
+
+            {showTestInput && (
+              <div className="absolute right-0 top-full mt-2 z-50 w-72 border-2 border-foreground bg-background shadow-[4px_4px_0px_0px_oklch(0.1_0_0)]">
+                <div className="bg-foreground text-background px-4 py-2.5 flex items-center justify-between">
+                  <p className="text-[10px] uppercase tracking-[0.2em] font-bold">Send Test Email</p>
+                  <button
+                    onClick={() => { setShowTestInput(false); setTestEmail("") }}
+                    className="text-background/60 hover:text-background transition-colors"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+                <div className="p-4 space-y-3">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
+                      Recipient
+                    </label>
+                    <Input
+                      ref={testInputRef}
+                      type="email"
+                      value={testEmail}
+                      onChange={(e) => setTestEmail(e.target.value)}
+                      placeholder="you@example.com"
+                      className="h-9 text-sm"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") testMutation.mutate(testEmail)
+                        if (e.key === "Escape") { setShowTestInput(false); setTestEmail("") }
+                      }}
+                      autoFocus
+                    />
+                  </div>
+                  <Button
+                    className="w-full shadow-md hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
+                    disabled={testMutation.isPending}
+                    onClick={() => testMutation.mutate(testEmail)}
+                  >
+                    {testMutation.isPending
+                      ? <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      : <Send className="mr-2 h-4 w-4" />}
+                    Send Test
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Duplicate — available on all statuses */}
           <Button
